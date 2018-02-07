@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import subprocess
+
+
+def exec_cmd(cmd, input=None):
+    p = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stdin=(subprocess.PIPE if input else None))
+    stdout, _ = p.communicate(input)
+    return stdout
+
+
+def get_diff(tag):
+    return exec_cmd([
+        "git", "log", "--pretty=%h %s", "--no-merges", "{}..HEAD".format(tag)
+    ]).splitlines()
+
+
+def get_last_tag():
+    return max(
+        map(int, tag.split('.'))
+        for tag in exec_cmd(["git", "tag"]).splitlines())
+
+
+def inc_tag(tag):
+    tag = tag[:]
+    tag[-1] += 1
+    return tag
+
+
+def str_tag(tag):
+    return '.'.join(map(str, tag))
+
+
+def get_info(version):
+    last_tag = get_last_tag()
+    new_tag = args.version or str_tag(inc_tag(last_tag))
+
+    subject = "Version {}".format(new_tag)
+    changes = '\n'.join(
+        '* {}'.format(line) for line in get_diff(str_tag(last_tag)))
+
+    annotation = """{subject}
+{sep}
+
+{changes}
+""".format(
+        subject=subject, sep='-' * len(subject), changes=changes)
+    return new_tag, annotation
+
+
+def bump(tag, annotation):
+    exec_cmd(["git", "tag", "-s", "-F-", tag], input=annotation)
+
+
+def main(args):
+    tag, annotation = get_info(args.version)
+    bump(tag, annotation)
+    print(exec_cmd(["git", "show", tag]))
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('version', nargs='?')
+
+    args = parser.parse_args()
+
+    main(args)
