@@ -1,12 +1,19 @@
 language: python
+cache: pip
 python:
   - "2.7"
   - "3.6"
 
+branches:
+  only:
+  - master
+  - /^\d+\.\d+(\.\d+)?$/
+
 install:
-  - pip install -r requirements.txt pyyaml codecov coverage
+  - pip install -r requirements.txt -r test-requirements.txt
 
 script:
+  - flake8 --show-source
   - coverage run --source=marshmallow_objects setup.py test
 
 after_success:
