@@ -14,6 +14,12 @@ import marshmallow_objects as marshmallow
 
 class A(marshmallow.Model):
     test_field = marshmallow.fields.Str(missing='test_value', allow_none=False)
+    tag_field = marshmallow.fields.Str(load_only=True)
+
+    @marshmallow.post_load
+    def set_tag_field(self, data):
+        data.tag_field = data.test_field
+        return data
 
 
 class B(marshmallow.Model):
@@ -36,8 +42,15 @@ class TestModelMeta(unittest.TestCase):
         assert issubclass(A.__schema_class__.__model_class__,
                           marshmallow.Model)
 
+    def test_tag_processor(self):
+        assert hasattr(A.__schema_class__, 'set_tag_field')
+
 
 class TestModel(unittest.TestCase):
+    def test_tag_field(self):
+        a = A(test_field='tag_value', tag_field='fake')
+        self.assertEqual('tag_value', a.tag_field)
+
     def test_default_value(self):
         a = A()
         self.assertEqual('test_value', a.test_field)

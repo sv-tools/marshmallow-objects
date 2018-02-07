@@ -31,6 +31,8 @@ class ModelMeta(type):
             if isinstance(value, fields.Field):
                 schema_fields[key] = value
                 setattr(cls, key, None)
+            elif hasattr(value, '__marshmallow_tags__'):
+                schema_fields[key] = value
 
         parent_schema = marshmallow.Schema
         if parents:
