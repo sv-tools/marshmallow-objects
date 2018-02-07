@@ -14,9 +14,11 @@ after_success:
 
 deploy:
   provider: pypi
+  distributions: sdist bdist_wheel
   user: svilgelm
   password:
       secure: qkNXzEFF6uMct0puHZ2Yd1pmNrIwjnrzdOzT3zyd2wIHUaUaFBDCpjRdBamelmyl5/MIFHi7LQKTTnE1t5PzhUYJEaVYovYmH9c6zI/P0PUliZt6FbRLWkB+7ZCkQ7V9b2NJNVN2LJk7tTR3t3X3/n+hAnTZtIZ9hD9FnBwHYwD65UCXlCLV6+hPP4q/lWFH3W7ui/0/ymVnvxp0/GL+wX2hr2LpxZx3Gy3t2xcakM3QwyuQVHXpoMiLuKUCLZJTfcACWaFqjyKEyR+vOnFFHIHZBUBmvkhTsZ04H4gjkQjn+LM/eG6z62xk4rBjQKnsu5xSnperTWkYVhlebzXSmz98VrRntJ5Ixr2n7UhP1gep+G+JbinomQshti+mVEgfJOnhKD28Ni2iWKSci0WA9xjk9+aAyWd4YuVpus/2da7heMBMdW1vxtukBj9pliR22kZfaWsUH39nyQPgIwEQhPFqzuQPx/pp2gOIV5sN+YBpjqLAb1sNlHz2RDP3xnX3r6uiirx/AXORUHbbxHbtIB5NI2wMuIMrlAkOtQod+mH74mudNKtXh1EL8ydiNwal5gJYgFRZbGuxNlBxQ3N64Oe7djWLZJpm9ELD8e0xfVyRMjymKa+8wGXbYz5HGADCedrCJuibI7qz41KOTu7WK7RUK9reC7BzP4CuIWIS1fY=
   on:
     tags: true
     branch: master
+    python: 3.6
