@@ -36,7 +36,7 @@ class ModelMeta(type):
             elif hasattr(value, '__marshmallow_tags__'):
                 schema_fields[key] = value
 
-        parent_schema = marshmallow.Schema
+        parent_schema = cls.__schema_class__ or marshmallow.Schema
         if parents:
             for parent in parents:
                 if issubclass(parent, Model):
@@ -71,7 +71,7 @@ class NestedModel(fields.Nested):
 
 
 class Model(compat.with_metaclass(ModelMeta)):
-    __schema_class__ = None
+    __schema_class__ = marshmallow.Schema
     __schema__ = None
 
     @classmethod
@@ -131,6 +131,11 @@ class Model(compat.with_metaclass(ModelMeta)):
 
     def dump_yaml(self, default_flow_style=False):
         return yaml.dump(self.dump(), default_flow_style=default_flow_style)
+
+    @classmethod
+    def validate(cls, data, context=None, many=None, partial=None):
+        schema = cls.__get_schema_class__(strict=False, context=context)
+        return schema.validate(data, many=many, partial=partial)
 
     def __copy__(self):
         return self.__class__.load(self.dump(), context=self.context)

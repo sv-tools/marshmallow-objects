@@ -99,6 +99,19 @@ class TestModel(unittest.TestCase):
         b = B(partial=True)
         self.assertIsNone(b.a)
 
+    def test_validate(self):
+        b = B.validate({})
+        self.assertIn('a', b)
+
+    def test_validate_partial(self):
+        class APartial(marshmallow.Model):
+            test_field = marshmallow.fields.Str(required=True)
+            email = marshmallow.fields.Email()
+
+        a = APartial.validate(dict(email='foo'), partial=True)
+        self.assertNotIn('test_field', a)
+        self.assertIn('email', a)
+
     def test_eq(self):
         a1 = A(test_field='1')
         a2 = A(test_field='1')
@@ -232,6 +245,18 @@ class TestContext(unittest.TestCase):
         self.assertEqual(b.context, b.a.context)
         ddata = b.dump()
         self.assertFalse(ddata['a']['test_context_field'])
+
+    def test_validate_partial(self):
+        class APartial(marshmallow.Model):
+            test_field = marshmallow.fields.Str(required=True)
+            email = marshmallow.fields.Email()
+
+        aa = APartial.validate(
+            [dict(email='foo'), dict(email='bar')], many=True, partial=True)
+        self.assertEqual(2, len(aa))
+        for a in aa.values():
+            self.assertNotIn('test_field', a)
+            self.assertIn('email', a)
 
 
 class TestMany(unittest.TestCase):
