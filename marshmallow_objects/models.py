@@ -1,3 +1,5 @@
+import collections
+import json
 import pprint
 
 import marshmallow
@@ -91,27 +93,27 @@ class Model(compat.with_metaclass(ModelMeta)):
         self.__schema__.context = value
 
     @classmethod
-    def load(cls, data, context=None):
+    def load(cls, data, context=None, many=None):
         schema = cls.__get_schema_class__(context=context)
-        loaded, _ = schema.load(data)
+        loaded, _ = schema.load(data, many=many)
         return loaded
 
     def dump(self):
         return self.__schema__.dump(self).data
 
     @classmethod
-    def load_json(cls, data, context=None):
+    def load_json(cls, data, context=None, many=None):
         schema = cls.__get_schema_class__(context=context)
-        loaded, _ = schema.loads(data)
+        loaded, _ = schema.loads(data, many=many)
         return loaded
 
     def dump_json(self):
         return self.__schema__.dumps(self).data
 
     @classmethod
-    def load_yaml(cls, data, context=None):
+    def load_yaml(cls, data, context=None, many=None):
         loaded = yaml.load(data)
-        return cls.load(loaded, context=context)
+        return cls.load(loaded, context=context, many=many)
 
     def dump_yaml(self, default_flow_style=False):
         return yaml.dump(self.dump(), default_flow_style=default_flow_style)
@@ -132,3 +134,39 @@ class Model(compat.with_metaclass(ModelMeta)):
 
     def __str__(self):
         return pprint.pformat(self.dump())
+
+
+def dump_many(data, context=None):
+    ret = []
+    for obj in data:
+        if isinstance(obj, Model):
+            if context is None:
+                schema = obj.__schema__
+            else:
+                schema = obj.__get_schema_class__(context=context)
+            obj_data, _ = schema.dump(obj)
+            ret.append(obj_data)
+        elif (isinstance(obj, collections.Sequence)
+              and not isinstance(obj, str)):
+            ret.append(dump_many(obj, context=context))
+        else:
+            raise marshmallow.ValidationError(
+                "The object '%s' is not an instance of Model class" % obj,
+                data=data)
+
+    return ret
+
+
+def dump_many_json(data, context=None, *args, **kwargs):
+    ret = dump_many(data, context)
+    return json.dumps(ret, *args, **kwargs)
+
+
+def dump_many_yaml(data,
+                   context=None,
+                   default_flow_style=False,
+                   *args,
+                   **kwargs):
+    ret = dump_many(data, context)
+    return yaml.dump(
+        ret, default_flow_style=default_flow_style, *args, **kwargs)
