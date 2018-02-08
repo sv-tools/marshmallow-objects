@@ -94,6 +94,11 @@ class TestModel(unittest.TestCase):
         c = C(a=[dict(test_field='1'), dict(test_field='2')])
         self.assertEqual(2, len(c.a))
 
+    def test_partial(self):
+        self.assertRaises(marshmallow.ValidationError, B)
+        b = B(partial=True)
+        self.assertIsNone(b.a)
+
     def test_eq(self):
         a1 = A(test_field='1')
         a2 = A(test_field='1')
@@ -139,6 +144,11 @@ class TestModelLoadDump(unittest.TestCase):
         a = A.load(self.data)
         self.assertEqual('foo', a.test_field)
 
+    def test_load_dict_partial(self):
+        self.assertRaises(marshmallow.ValidationError, B)
+        b = B.load({}, partial=True)
+        self.assertIsNone(b.a)
+
     def test_load_dict_nested(self):
         ddata = dict(test_field='foo', a=dict(test_field='bar'))
         b = B.load(ddata)
@@ -154,6 +164,11 @@ class TestModelLoadDump(unittest.TestCase):
         a = A.load_json(jdata)
         self.assertEqual('foo', a.test_field)
 
+    def test_load_json_partial(self):
+        self.assertRaises(marshmallow.ValidationError, B)
+        b = B.load_json('{}', partial=True)
+        self.assertIsNone(b.a)
+
     def test_dump_json(self):
         a = A(test_field='foo')
         jdata = json.loads(a.dump_json())
@@ -164,6 +179,12 @@ class TestModelLoadDump(unittest.TestCase):
         ydata = yaml.dump(self.data)
         a = A.load_yaml(ydata)
         self.assertEqual('foo', a.test_field)
+
+    @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
+    def test_load_yaml_partial(self):
+        self.assertRaises(marshmallow.ValidationError, B)
+        b = B.load_yaml('{}', partial=True)
+        self.assertIsNone(b.a)
 
     @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
     def test_dump_yaml(self):
@@ -215,8 +236,10 @@ class TestContext(unittest.TestCase):
 
 class TestMany(unittest.TestCase):
     def setUp(self):
-        self.data = [dict(test_field='foo', a=dict(test_field='bar')),
-                     dict(test_field='foo', a=dict(test_field='bar'))]
+        self.data = [
+            dict(test_field='foo', a=dict(test_field='bar')),
+            dict(test_field='foo', a=dict(test_field='bar'))
+        ]
 
     def assert_objects(self, bb):
         self.assertEqual(2, len(bb))
@@ -238,6 +261,19 @@ class TestMany(unittest.TestCase):
     def test_load_many_as_one(self):
         self.assertRaises(marshmallow.ValidationError, B.load, self.data)
 
+    def test_load_many_partial(self):
+        self.assertRaises(
+            marshmallow.ValidationError,
+            B.load,
+            data=[{}, {}],
+            many=True,
+            partial=False)
+        bb = B.load([{}, {}], many=True, partial=True)
+        self.assertEqual(2, len(bb))
+        for b in bb:
+            self.assertIsNone(b.test_field)
+            self.assertIsNone(b.a)
+
     def test_load_json(self):
         jdata = json.dumps(self.data)
         bb = B.load_json(jdata, many=True)
@@ -255,16 +291,13 @@ class TestMany(unittest.TestCase):
 
     def test_dump_different_classes(self):
         adata = dict(test_field='foo')
-        odata = [
-            B.load(self.data, many=True),
-            A(**adata)
-        ]
+        odata = [B.load(self.data, many=True), A(**adata)]
         ddata = marshmallow.dump_many(odata)
         self.assertEqual([self.data, adata], ddata)
 
     def test_dump_fake(self):
-        self.assertRaises(marshmallow.ValidationError, marshmallow.dump_many,
-                          data='fake')
+        self.assertRaises(
+            marshmallow.ValidationError, marshmallow.dump_many, data='fake')
 
     def test_dump_context(self):
         context = {'value': 'bar'}

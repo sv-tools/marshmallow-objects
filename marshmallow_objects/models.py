@@ -55,7 +55,8 @@ class ModelMeta(type):
             obj.__init__(**kwargs)
         else:
             context = kwargs.pop('context', None)
-            obj = cls.load(kwargs, context=context)
+            partial = kwargs.pop('partial', None)
+            obj = cls.load(kwargs, context=context, partial=partial)
         return obj
 
 
@@ -77,7 +78,7 @@ class Model(compat.with_metaclass(ModelMeta)):
     def __get_schema_class__(cls, strict=True, **kwargs):
         return cls.__schema_class__(strict=strict, **kwargs)
 
-    def __init__(self, **kwargs):
+    def __init__(self, context=None, partial=None, **kwargs):
         pass
 
     @property
@@ -93,8 +94,8 @@ class Model(compat.with_metaclass(ModelMeta)):
         self.__schema__.context = value
 
     @classmethod
-    def load(cls, data, context=None, many=None):
-        schema = cls.__get_schema_class__(context=context)
+    def load(cls, data, context=None, many=None, partial=None):
+        schema = cls.__get_schema_class__(context=context, partial=partial)
         loaded, _ = schema.load(data, many=many)
         return loaded
 
@@ -102,18 +103,31 @@ class Model(compat.with_metaclass(ModelMeta)):
         return self.__schema__.dump(self).data
 
     @classmethod
-    def load_json(cls, data, context=None, many=None):
+    def load_json(cls,
+                  data,
+                  context=None,
+                  many=None,
+                  partial=None,
+                  *args,
+                  **kwargs):
         schema = cls.__get_schema_class__(context=context)
-        loaded, _ = schema.loads(data, many=many)
+        loaded, _ = schema.loads(
+            data, many=many, partial=partial, *args, **kwargs)
         return loaded
 
     def dump_json(self):
         return self.__schema__.dumps(self).data
 
     @classmethod
-    def load_yaml(cls, data, context=None, many=None):
-        loaded = yaml.load(data)
-        return cls.load(loaded, context=context, many=many)
+    def load_yaml(cls,
+                  data,
+                  context=None,
+                  many=None,
+                  partial=None,
+                  *args,
+                  **kwargs):
+        loaded = yaml.load(data, *args, **kwargs)
+        return cls.load(loaded, context=context, many=many, partial=partial)
 
     def dump_yaml(self, default_flow_style=False):
         return yaml.dump(self.dump(), default_flow_style=default_flow_style)
