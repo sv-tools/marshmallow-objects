@@ -31,6 +31,25 @@ class C(marshmallow.Model):
     a = marshmallow.NestedModel(A, many=True)
 
 
+def serialize_context_field(obj, context=None):
+    return obj.test_field == context['value']
+
+
+def deserialize_context_field(obj, context=None):
+    return obj == context['value']
+
+
+class AContext(marshmallow.Model):
+    test_field = marshmallow.fields.Str()
+    test_context_field = marshmallow.fields.Function(
+        serialize=serialize_context_field,
+        deserialize=deserialize_context_field)
+
+
+class BContext(marshmallow.Model):
+    a = marshmallow.NestedModel(AContext)
+
+
 class TestModelMeta(unittest.TestCase):
     def test_schema_name(self):
         self.assertEqual('ASchema', A.__schema_class__.__name__)
@@ -153,16 +172,6 @@ class TestModelLoadDump(unittest.TestCase):
         self.assertEqual(self.data, ydata)
 
 
-class AContext(marshmallow.Model):
-    test_field = marshmallow.fields.Str()
-    test_context_field = marshmallow.fields.Function(
-        lambda obj, context: obj.test_field == context['value'])
-
-
-class BContext(marshmallow.Model):
-    a = marshmallow.NestedModel(AContext)
-
-
 class TestContext(unittest.TestCase):
     def setUp(self):
         self.context = {'value': 'foo'}
@@ -178,6 +187,10 @@ class TestContext(unittest.TestCase):
         a = AContext(context=self.context, **self.data)
         ddata = a.dump()
         self.assertTrue(ddata['test_context_field'])
+
+    def test_no_context(self):
+        a = AContext(**self.data)
+        self.assertRaises(KeyError, a.dump)
 
     def test_nested_context(self):
         b = BContext(context=self.context, **self.nested_data)
@@ -198,3 +211,81 @@ class TestContext(unittest.TestCase):
         self.assertEqual(b.context, b.a.context)
         ddata = b.dump()
         self.assertFalse(ddata['a']['test_context_field'])
+
+
+class TestMany(unittest.TestCase):
+    def setUp(self):
+        self.data = [dict(test_field='foo', a=dict(test_field='bar')),
+                     dict(test_field='foo', a=dict(test_field='bar'))]
+
+    def assert_objects(self, bb):
+        self.assertEqual(2, len(bb))
+        ids = set()
+        for b in bb:
+            self.assertEqual('foo', b.test_field)
+            self.assertEqual('bar', b.a.test_field)
+            b_id = id(b)
+            a_id = id(b.a)
+            self.assertNotIn(b_id, ids)
+            self.assertNotIn(a_id, ids)
+            ids.add(b_id)
+            ids.add(a_id)
+
+    def test_load_many(self):
+        bb = B.load(self.data, many=True)
+        self.assert_objects(bb)
+
+    def test_load_many_as_one(self):
+        self.assertRaises(marshmallow.ValidationError, B.load, self.data)
+
+    def test_load_json(self):
+        jdata = json.dumps(self.data)
+        bb = B.load_json(jdata, many=True)
+        self.assert_objects(bb)
+
+    def test_load_yaml(self):
+        ydata = yaml.dump(self.data, default_flow_style=False)
+        bb = B.load_yaml(ydata, many=True)
+        self.assert_objects(bb)
+
+    def test_dump_same_classes(self):
+        bb = B.load(self.data, many=True)
+        ddata = marshmallow.dump_many(bb)
+        self.assertEqual(self.data, ddata)
+
+    def test_dump_different_classes(self):
+        adata = dict(test_field='foo')
+        odata = [
+            B.load(self.data, many=True),
+            A(**adata)
+        ]
+        ddata = marshmallow.dump_many(odata)
+        self.assertEqual([self.data, adata], ddata)
+
+    def test_dump_fake(self):
+        self.assertRaises(marshmallow.ValidationError, marshmallow.dump_many,
+                          data='fake')
+
+    def test_dump_context(self):
+        context = {'value': 'bar'}
+        bb = BContext.load(self.data, context=context, many=True)
+        ddata = marshmallow.dump_many(bb, context={'value': 'foo'})
+        context_id = id(context)
+        for b in bb:
+            self.assertEqual(context_id, id(b.context))
+            self.assertEqual(context_id, id(b.a.context))
+        for b in ddata:
+            self.assertFalse(b['a']['test_context_field'])
+
+    def test_dump_json(self):
+        bb = B.load(self.data, many=True)
+        jdata = marshmallow.dump_many_json(bb)
+        ddata = json.loads(jdata)
+        self.assertEqual(self.data, ddata)
+
+    @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
+    def test_dump_yaml(self):
+        bb = B.load(self.data, many=True)
+        ydata = marshmallow.dump_many_yaml(bb)
+        ddata = yaml.load(ydata)
+        self.assertEqual(self.data, ddata)
