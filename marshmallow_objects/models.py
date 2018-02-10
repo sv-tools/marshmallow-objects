@@ -1,11 +1,16 @@
 import collections
 import json
 import pprint
+try:
+    import configparser
+    import io
+except ImportError:
+    import ConfigParser as configparser
+    import StringIO as io
 
 import marshmallow
 from marshmallow import compat
 from marshmallow import fields
-
 try:
     import yaml
 except ImportError:
@@ -131,6 +136,33 @@ class Model(compat.with_metaclass(ModelMeta)):
 
     def dump_yaml(self, default_flow_style=False):
         return yaml.dump(self.dump(), default_flow_style=default_flow_style)
+
+    @classmethod
+    def load_ini(cls, data, default_section=None):
+        parser = configparser.ConfigParser(
+            default_section=default_section or configparser.DEFAULTSECT)
+        if compat.PY2:
+            data = unicode(data)  # noqa
+        parser.read_string(data)
+        ddata = parser._sections
+        ddata.update(parser.defaults())
+        return cls.load(ddata)
+
+    def dump_ini(self, default_section=None):
+        data = {}
+        default_data = {}
+        for key, value in self.dump().items():
+            if isinstance(value, dict):
+                data[key] = value
+            else:
+                default_data[key] = value
+        parser = configparser.ConfigParser(
+            defaults=default_data,
+            default_section=default_section or configparser.DEFAULTSECT)
+        parser._sections = data
+        fp = io.StringIO()
+        parser.write(fp)
+        return fp.getvalue().strip()
 
     @classmethod
     def validate(cls, data, context=None, many=None, partial=None):
