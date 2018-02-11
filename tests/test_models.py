@@ -347,3 +347,23 @@ class TestMany(unittest.TestCase):
         ydata = marshmallow.dump_many_yaml(bb)
         ddata = yaml.load(ydata)
         self.assertEqual(self.data, ddata)
+
+
+class TestIni(unittest.TestCase):
+    def setUp(self):
+        self.data = """
+[DEFAULT]
+test_field = foo
+
+[a]
+test_field = bar
+""".strip()
+
+    def test_load(self):
+        b = B.load_ini(self.data)
+        self.assertEqual('foo', b.test_field)
+        self.assertEqual('bar', b.a.test_field)
+
+    def test_dump(self):
+        b = B(test_field='foo', a=dict(test_field='bar'))
+        self.assertEqual(self.data, b.dump_ini())
