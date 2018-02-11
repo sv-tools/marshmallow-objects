@@ -138,17 +138,16 @@ class Model(compat.with_metaclass(ModelMeta)):
         return yaml.dump(self.dump(), default_flow_style=default_flow_style)
 
     @classmethod
-    def load_ini(cls, data, default_section=None):
-        parser = configparser.ConfigParser(
-            default_section=default_section or configparser.DEFAULTSECT)
+    def load_ini(cls, data, context=None, partial=None, **kwargs):
+        parser = configparser.ConfigParser(**kwargs)
         if compat.PY2:
             data = unicode(data)  # noqa
         parser.read_string(data)
         ddata = parser._sections
         ddata.update(parser.defaults())
-        return cls.load(ddata)
+        return cls.load(ddata, context=context, partial=partial)
 
-    def dump_ini(self, default_section=None):
+    def dump_ini(self, **kwargs):
         data = {}
         default_data = {}
         for key, value in self.dump().items():
@@ -156,9 +155,8 @@ class Model(compat.with_metaclass(ModelMeta)):
                 data[key] = value
             else:
                 default_data[key] = value
-        parser = configparser.ConfigParser(
-            defaults=default_data,
-            default_section=default_section or configparser.DEFAULTSECT)
+        kwargs['defaults'] = default_data
+        parser = configparser.ConfigParser(**kwargs)
         parser._sections = data
         fp = io.StringIO()
         parser.write(fp)
