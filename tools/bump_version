@@ -55,10 +55,22 @@ def bump(tag, annotation):
     exec_cmd(["git", "tag", "-s", "-F-", tag], input=annotation)
 
 
+def push():
+    exec_cmd(["git", "push", "origin", "--tags"])
+
+
+def show(tag):
+    return exec_cmd(["git", "show", tag])
+
+
 def main(args):
     tag, annotation = get_info(args.version)
     bump(tag, annotation)
-    print(exec_cmd(["git", "show", tag]))
+    print(show(tag))
+
+    a = raw_input('Push new tag? [y/N]: ')
+    if a.lower() in ('y', 'yes'):
+        push()
 
 
 if __name__ == '__main__':
