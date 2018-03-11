@@ -38,6 +38,12 @@ class ModelMeta(type):
             if isinstance(value, fields.Field):
                 schema_fields[key] = value
                 setattr(cls, key, None)
+                if isinstance(value, fields.Method):
+                    for method_name in (value.serialize_method_name,
+                                        value.deserialize_method_name):
+                        if method_name is not None:
+                            schema_fields[method_name] = dct[method_name]
+
             elif hasattr(value, '__marshmallow_tags__'):
                 schema_fields[key] = value
 

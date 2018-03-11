@@ -22,6 +22,19 @@ class A(marshmallow.Model):
         return data
 
 
+class AMethod(marshmallow.Model):
+    yes_no = marshmallow.fields.Method(
+        serialize='serialize_yes_no',
+        deserialize='deserialize_yes_no',
+    )
+
+    def serialize_yes_no(self, obj):
+        return 'Yes' if obj else 'No'
+
+    def deserialize_yes_no(self, obj):
+        return obj.lower() in ['y', 'yes']
+
+
 class B(marshmallow.Model):
     test_field = marshmallow.fields.Str(allow_none=True)
     a = marshmallow.NestedModel(A, allow_none=False, required=True)
@@ -147,6 +160,14 @@ class TestModel(unittest.TestCase):
     def test_str(self):
         a = A()
         self.assertIn('test_value', str(a))
+
+    def test_yes_no(self):
+        a = AMethod(yes_no='Y')
+        self.assertTrue(a.yes_no)
+        self.assertEqual({'yes_no': 'Yes'}, a.dump())
+
+        a = AMethod(yes_no='NOOOO')
+        self.assertFalse(a.yes_no)
 
 
 class TestModelLoadDump(unittest.TestCase):
