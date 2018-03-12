@@ -48,6 +48,7 @@ Project Links
 
 * [Marshmallow](https://github.com/marshmallow-code/marshmallow)
 * [PyPi](https://pypi.python.org/pypi/marshmallow-objects)
+* [Cookbook](https://github.com/SVilgelm/marshmallow-objects/wiki)
 
 License
 -------
