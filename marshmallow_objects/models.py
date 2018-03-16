@@ -16,6 +16,9 @@ try:
 except ImportError:
     pass
 
+# Checking Marshmallow version
+MM2 = marshmallow.__version__.startswith('2')
+
 
 @marshmallow.post_load
 def __make_object__(self, data):
@@ -86,8 +89,10 @@ class Model(compat.with_metaclass(ModelMeta)):
     __schema__ = None
 
     @classmethod
-    def __get_schema_class__(cls, strict=True, **kwargs):
-        return cls.__schema_class__(strict=strict, **kwargs)
+    def __get_schema_class__(cls, **kwargs):
+        if MM2:
+            kwargs.setdefault('strict', True)
+        return cls.__schema_class__(**kwargs)
 
     def __init__(self, context=None, partial=None, **kwargs):
         pass
@@ -107,11 +112,16 @@ class Model(compat.with_metaclass(ModelMeta)):
     @classmethod
     def load(cls, data, context=None, many=None, partial=None):
         schema = cls.__get_schema_class__(context=context, partial=partial)
-        loaded, _ = schema.load(data, many=many)
+        loaded = schema.load(data, many=many)
+        if MM2:
+            return loaded[0]
         return loaded
 
     def dump(self):
-        return self.__schema__.dump(self).data
+        dump = self.__schema__.dump(self)
+        if MM2:
+            return dump.data
+        return dump
 
     @classmethod
     def load_json(cls,
@@ -122,12 +132,17 @@ class Model(compat.with_metaclass(ModelMeta)):
                   *args,
                   **kwargs):
         schema = cls.__get_schema_class__(context=context)
-        loaded, _ = schema.loads(
+        loaded = schema.loads(
             data, many=many, partial=partial, *args, **kwargs)
+        if MM2:
+            return loaded[0]
         return loaded
 
     def dump_json(self):
-        return self.__schema__.dumps(self).data
+        dump = self.__schema__.dumps(self)
+        if MM2:
+            return dump.data
+        return dump
 
     @classmethod
     def load_yaml(cls,
@@ -170,7 +185,10 @@ class Model(compat.with_metaclass(ModelMeta)):
 
     @classmethod
     def validate(cls, data, context=None, many=None, partial=None):
-        schema = cls.__get_schema_class__(strict=False, context=context)
+        kwargs = {'context': context}
+        if MM2:
+            kwargs['strict'] = False
+        schema = cls.__get_schema_class__(**kwargs)
         return schema.validate(data, many=many, partial=partial)
 
     def __copy__(self):
@@ -199,7 +217,9 @@ def dump_many(data, context=None):
                 schema = obj.__schema__
             else:
                 schema = obj.__get_schema_class__(context=context)
-            obj_data, _ = schema.dump(obj)
+            obj_data = schema.dump(obj)
+            if MM2:
+                obj_data = obj_data[0]
             ret.append(obj_data)
         elif (isinstance(obj, collections.Sequence)
               and not isinstance(obj, str)):
