@@ -21,6 +21,9 @@ class A(marshmallow.Model):
         data.tag_field = data.test_field
         return data
 
+    class Meta:
+        ordered = True
+
 
 class AMethod(marshmallow.Model):
     yes_no = marshmallow.fields.Method(
@@ -76,6 +79,12 @@ class TestModelMeta(unittest.TestCase):
 
     def test_tag_processor(self):
         assert hasattr(A.__schema_class__, 'set_tag_field')
+
+    def test_meta(self):
+        assert hasattr(A.__schema_class__, 'Meta')
+        self.assertEqual(id(A.Meta), id(A.__schema_class__.Meta))
+        assert not hasattr(B, 'Meta')
+        assert hasattr(B.__schema_class__, 'Meta')
 
 
 class TestModel(unittest.TestCase):
@@ -225,6 +234,12 @@ class TestModelLoadDump(unittest.TestCase):
         a = A(test_field='foo')
         ydata = yaml.load(a.dump_yaml())
         self.assertEqual(self.data, ydata)
+
+    def test_dump_ordered(self):
+        a = A(test_field='foo').dump()
+        b = B(test_field='foo', a=dict(test_field='bar')).dump()
+        self.assertIsInstance(a, marshmallow.compat.OrderedDict)
+        self.assertIsInstance(b, dict)
 
 
 class TestContext(unittest.TestCase):
