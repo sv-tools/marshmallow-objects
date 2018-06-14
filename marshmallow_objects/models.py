@@ -61,12 +61,12 @@ class ModelMeta(type):
 
         return cls
 
-    def __call__(cls, **kwargs):
+    def __call__(cls, *args, **kwargs):
         if kwargs.pop('__post_load__', False):
-            obj = super(ModelMeta, cls).__call__(**kwargs)
+            obj = cls.__new__(cls, *args, **kwargs)
             for name, value in kwargs.items():
                 setattr(obj, name, value)
-            obj.__init__(**kwargs)
+            obj.__init__(*args, **kwargs)
         else:
             context = kwargs.pop('context', None)
             partial = kwargs.pop('partial', None)
