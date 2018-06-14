@@ -340,6 +340,7 @@ class TestMany(unittest.TestCase):
         bb = B.load_json(jdata, many=True)
         self.assert_objects(bb)
 
+    @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
     def test_load_yaml(self):
         ydata = yaml.dump(self.data, default_flow_style=False)
         bb = B.load_yaml(ydata, many=True)
@@ -403,3 +404,17 @@ test_field = bar
     def test_dump(self):
         b = B(test_field='foo', a=dict(test_field='bar'))
         self.assertEqual(self.data, b.dump_ini())
+
+
+class InitModel(marshmallow.Model):
+    count = 0
+
+    def __init__(self):
+        super(InitModel, self).__init__()
+        self.count = self.count + 1
+
+
+class TestInit(unittest.TestCase):
+    def test_init(self):
+        obj = InitModel()
+        self.assertEqual(1, obj.count)
