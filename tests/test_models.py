@@ -1,3 +1,4 @@
+import collections
 import copy
 import json
 import unittest
@@ -238,7 +239,7 @@ class TestModelLoadDump(unittest.TestCase):
     def test_dump_ordered(self):
         a = A(test_field='foo').dump()
         b = B(test_field='foo', a=dict(test_field='bar')).dump()
-        self.assertIsInstance(a, marshmallow.compat.OrderedDict)
+        self.assertIsInstance(a, collections.OrderedDict)
         self.assertIsInstance(b, dict)
 
 
