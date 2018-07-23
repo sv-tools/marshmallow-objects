@@ -47,9 +47,9 @@ class ModelMeta(type):
                         if method_name is not None:
                             schema_fields[method_name] = dct[method_name]
 
-            elif hasattr(value,
-                         '__marshmallow_tags__' if MM2 else
-                         '__marshmallow_hook__') or key == 'Meta':
+            elif hasattr(value, '__marshmallow_tags__'
+                         if MM2 else '__marshmallow_hook__') or key in (
+                             'Meta', 'on_bind_field', 'handle_error'):
                 schema_fields[key] = value
 
         parent_schema = cls.__schema_class__ or marshmallow.Schema
