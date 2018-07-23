@@ -25,6 +25,12 @@ class A(marshmallow.Model):
     class Meta:
         ordered = True
 
+    def on_bind_field(self, field_name, field_obj):
+        pass
+
+    def handle_error(self, error, data):
+        pass
+
 
 class AMethod(marshmallow.Model):
     yes_no = marshmallow.fields.Method(
@@ -86,6 +92,14 @@ class TestModelMeta(unittest.TestCase):
         self.assertEqual(id(A.Meta), id(A.__schema_class__.Meta))
         assert not hasattr(B, 'Meta')
         assert hasattr(B.__schema_class__, 'Meta')
+
+    def test_on_bind_filed(self):
+        self.assertEqual(
+            id(A.on_bind_field), id(A.__schema_class__.on_bind_field))
+
+    def test_handle_error(self):
+        self.assertEqual(
+            id(A.handle_error), id(A.__schema_class__.handle_error))
 
 
 class TestModel(unittest.TestCase):
