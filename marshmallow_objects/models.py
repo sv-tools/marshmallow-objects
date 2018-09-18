@@ -22,6 +22,9 @@ MM2 = marshmallow.__version__.startswith('2')
 
 @marshmallow.post_load
 def __make_object__(self, data):
+    for field in self._declared_fields.keys():
+        if not field in data:
+            data[field] = marshmallow.missing
     obj = self.__model_class__(__post_load__=True, **data)
     obj.__schema__ = self
     return obj

@@ -134,7 +134,7 @@ class TestModel(unittest.TestCase):
     def test_partial(self):
         self.assertRaises(marshmallow.ValidationError, B)
         b = B(partial=True)
-        self.assertIsNone(b.a)
+        self.assertEqual(b.a, marshmallow.missing)
 
     def test_validate(self):
         b = B.validate({})
@@ -205,7 +205,7 @@ class TestModelLoadDump(unittest.TestCase):
     def test_load_dict_partial(self):
         self.assertRaises(marshmallow.ValidationError, B)
         b = B.load({}, partial=True)
-        self.assertIsNone(b.a)
+        self.assertEqual(b.a, marshmallow.missing)
 
     def test_load_dict_nested(self):
         ddata = dict(test_field='foo', a=dict(test_field='bar'))
@@ -225,7 +225,7 @@ class TestModelLoadDump(unittest.TestCase):
     def test_load_json_partial(self):
         self.assertRaises(marshmallow.ValidationError, B)
         b = B.load_json('{}', partial=True)
-        self.assertIsNone(b.a)
+        self.assertEqual(b.a, marshmallow.missing)
 
     def test_dump_json(self):
         a = A(test_field='foo')
@@ -242,7 +242,7 @@ class TestModelLoadDump(unittest.TestCase):
     def test_load_yaml_partial(self):
         self.assertRaises(marshmallow.ValidationError, B)
         b = B.load_yaml('{}', partial=True)
-        self.assertIsNone(b.a)
+        self.assertEqual(b.a, marshmallow.missing)
 
     @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
     def test_dump_yaml(self):
@@ -347,8 +347,8 @@ class TestMany(unittest.TestCase):
         bb = B.load([{}, {}], many=True, partial=True)
         self.assertEqual(2, len(bb))
         for b in bb:
-            self.assertIsNone(b.test_field)
-            self.assertIsNone(b.a)
+            self.assertEqual(b.test_field, marshmallow.missing)
+            self.assertEqual(b.a, marshmallow.missing)
 
     def test_load_json(self):
         jdata = json.dumps(self.data)
@@ -433,3 +433,25 @@ class TestInit(unittest.TestCase):
     def test_init(self):
         obj = InitModel()
         self.assertEqual(1, obj.count)
+
+
+class OptionalModel(marshmallow.Model):
+    str_field = marshmallow.fields.Str(required=True)
+    int_field = marshmallow.fields.Int(default=None)
+
+
+class TestMissingFields(unittest.TestCase):
+
+    def test_partial_model_missing_fields(self):
+        model = OptionalModel(partial=True)
+        self.assertEqual(model.str_field, marshmallow.missing)
+        self.assertEqual(model.int_field, marshmallow.missing)
+
+    def test_model_present_fields(self):
+        model = OptionalModel(str_field='foo', int_field=0)
+        self.assertEqual(model.str_field, 'foo')
+        self.assertEqual(model.int_field, 0)
+
+    def test_partial_dump_missing(self):
+        ddata = OptionalModel(partial=True).dump()
+        self.assertEqual({'int_field': None}, ddata)
