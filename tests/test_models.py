@@ -194,6 +194,16 @@ class TestModel(unittest.TestCase):
         a = AMethod(yes_no='NOOOO')
         self.assertFalse(a.yes_no)
 
+    def test_dump_mode_on(self):
+        a = A()
+        self.assertFalse(a.__dump_mode__)
+        with a.__dump_mode_on__():
+            self.assertTrue(a.__dump_mode__)
+            with a.__dump_mode_on__():
+                self.assertTrue(a.__dump_mode__)
+            self.assertTrue(a.__dump_mode__)
+        self.assertFalse(a.__dump_mode__)
+
 
 class TestModelLoadDump(unittest.TestCase):
     def setUp(self):
@@ -434,3 +444,39 @@ class TestInit(unittest.TestCase):
     def test_init(self):
         obj = InitModel()
         self.assertEqual(1, obj.count)
+
+
+class OptionalModel(marshmallow.Model):
+    str_field = marshmallow.fields.Str(missing='foo')
+    int_field = marshmallow.fields.Int(default=-1)
+
+
+class TestOptionalModel(unittest.TestCase):
+    def test_partial_model(self):
+        model = OptionalModel(partial=True)
+        self.assertIsNone(model.str_field)
+        self.assertIsNone(model.int_field)
+
+    def test_model_default_and_missing_fields(self):
+        model = OptionalModel()
+        self.assertEqual('foo', model.str_field)
+        self.assertIsNone(model.int_field)
+
+    def test_model_present_fields(self):
+        model = OptionalModel(str_field='bar', int_field=1)
+        self.assertEqual('bar', model.str_field)
+        self.assertEqual(1, model.int_field)
+
+    def test_dump(self):
+        ddata = OptionalModel().dump()
+        self.assertEqual({'int_field': -1, 'str_field': 'foo'}, ddata)
+
+    def test_dump_partial(self):
+        ddata = OptionalModel(partial=True).dump()
+        self.assertEqual({'int_field': -1}, ddata)
+
+    def test_dump_changed_missing_field(self):
+        obj = OptionalModel(partial=True)
+        obj.int_field = 1
+        ddata = obj.dump()
+        self.assertEqual({'int_field': 1}, ddata)
