@@ -3,13 +3,16 @@ cache: pip
 python:
   - "2.7"
   - "3.6"
-
+env:
+  - MARSHMALLOW_VERSION=3.0.0b15
+  - MARSHMALLOW_VERSION=2.15.5
 branches:
   only:
   - master
   - /^\d+\.\d+(\.\d+)?$/
 
 install:
+  - pip install marshmallow==$MARSHMALLOW_VERSION
   - pip install -r requirements.txt -r test-requirements.txt
 
 script:
