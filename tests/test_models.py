@@ -70,6 +70,7 @@ class AContext(marshmallow.Model):
 
 
 class BContext(marshmallow.Model):
+    test_field = marshmallow.fields.Str()
     a = marshmallow.NestedModel(AContext)
 
 
