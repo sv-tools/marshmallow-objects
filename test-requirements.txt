@@ -1,4 +1,3 @@
 pyyaml
 coverage
-flake8
 codecov

@@ -1,34 +1,44 @@
 language: python
 cache: pip
-python:
-  - "2.7"
-  - "3.6"
-env:
-  - MARSHMALLOW_VERSION=3.0.0b15
-  - MARSHMALLOW_VERSION=2.15.5
 branches:
   only:
   - master
   - /^\d+\.\d+(\.\d+)?$/
 
+python:
+  - "3.6"
+  - "2.7"
+
+env:
+  - MARSHMALLOW_VERSION=2.15.5
+  - MARSHMALLOW_VERSION=3.0.0b15
+
 install:
   - pip install marshmallow==$MARSHMALLOW_VERSION
   - pip install -r requirements.txt -r test-requirements.txt
 
-script:
-  - flake8 --show-source
-  - coverage run --source=marshmallow_objects setup.py test
+script: coverage run --source=marshmallow_objects setup.py test
+after_success: codecov
 
-after_success:
-  - codecov
+stages:
+  - pep8
+  - test
+  - deploy
 
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: svilgelm
-  password:
-      secure: qkNXzEFF6uMct0puHZ2Yd1pmNrIwjnrzdOzT3zyd2wIHUaUaFBDCpjRdBamelmyl5/MIFHi7LQKTTnE1t5PzhUYJEaVYovYmH9c6zI/P0PUliZt6FbRLWkB+7ZCkQ7V9b2NJNVN2LJk7tTR3t3X3/n+hAnTZtIZ9hD9FnBwHYwD65UCXlCLV6+hPP4q/lWFH3W7ui/0/ymVnvxp0/GL+wX2hr2LpxZx3Gy3t2xcakM3QwyuQVHXpoMiLuKUCLZJTfcACWaFqjyKEyR+vOnFFHIHZBUBmvkhTsZ04H4gjkQjn+LM/eG6z62xk4rBjQKnsu5xSnperTWkYVhlebzXSmz98VrRntJ5Ixr2n7UhP1gep+G+JbinomQshti+mVEgfJOnhKD28Ni2iWKSci0WA9xjk9+aAyWd4YuVpus/2da7heMBMdW1vxtukBj9pliR22kZfaWsUH39nyQPgIwEQhPFqzuQPx/pp2gOIV5sN+YBpjqLAb1sNlHz2RDP3xnX3r6uiirx/AXORUHbbxHbtIB5NI2wMuIMrlAkOtQod+mH74mudNKtXh1EL8ydiNwal5gJYgFRZbGuxNlBxQ3N64Oe7djWLZJpm9ELD8e0xfVyRMjymKa+8wGXbYz5HGADCedrCJuibI7qz41KOTu7WK7RUK9reC7BzP4CuIWIS1fY=
-  on:
-    tags: true
-    branch: master
-    python: 3.6
+jobs:
+  include:
+    - stage: pep8
+      script: flake8 --show-source
+      install: pip install flake8
+      after_success: skip
+    - stage: deploy
+      script: skip
+      install: skip
+      after_success: skip
+      if: branch = master AND tag IS present
+      deploy:
+        provider: pypi
+        distributions: sdist bdist_wheel
+        user: svilgelm
+        password:
+            secure: qkNXzEFF6uMct0puHZ2Yd1pmNrIwjnrzdOzT3zyd2wIHUaUaFBDCpjRdBamelmyl5/MIFHi7LQKTTnE1t5PzhUYJEaVYovYmH9c6zI/P0PUliZt6FbRLWkB+7ZCkQ7V9b2NJNVN2LJk7tTR3t3X3/n+hAnTZtIZ9hD9FnBwHYwD65UCXlCLV6+hPP4q/lWFH3W7ui/0/ymVnvxp0/GL+wX2hr2LpxZx3Gy3t2xcakM3QwyuQVHXpoMiLuKUCLZJTfcACWaFqjyKEyR+vOnFFHIHZBUBmvkhTsZ04H4gjkQjn+LM/eG6z62xk4rBjQKnsu5xSnperTWkYVhlebzXSmz98VrRntJ5Ixr2n7UhP1gep+G+JbinomQshti+mVEgfJOnhKD28Ni2iWKSci0WA9xjk9+aAyWd4YuVpus/2da7heMBMdW1vxtukBj9pliR22kZfaWsUH39nyQPgIwEQhPFqzuQPx/pp2gOIV5sN+YBpjqLAb1sNlHz2RDP3xnX3r6uiirx/AXORUHbbxHbtIB5NI2wMuIMrlAkOtQod+mH74mudNKtXh1EL8ydiNwal5gJYgFRZbGuxNlBxQ3N64Oe7djWLZJpm9ELD8e0xfVyRMjymKa+8wGXbYz5HGADCedrCJuibI7qz41KOTu7WK7RUK9reC7BzP4CuIWIS1fY=
