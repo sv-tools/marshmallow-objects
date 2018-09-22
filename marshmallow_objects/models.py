@@ -164,9 +164,11 @@ class Model(compat.with_metaclass(ModelMeta)):
     def load_ini(cls, data, context=None, partial=None, **kwargs):
         parser = configparser.ConfigParser(**kwargs)
         if compat.PY2:
-            data = unicode(data)  # noqa
-        parser.read_string(data)
-        ddata = parser._sections
+            fp = io.StringIO(data)
+            parser.readfp(fp)
+        else:
+            parser.read_string(data)
+        ddata = {s: dict(parser.items(s)) for s in parser.sections()}
         ddata.update(parser.defaults())
         return cls.load(ddata, context=context, partial=partial)
 
