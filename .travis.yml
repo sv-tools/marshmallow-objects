@@ -35,7 +35,7 @@ jobs:
       script: skip
       install: skip
       after_success: skip
-      if: branch = master AND tag IS present
+      if: tag IS present
       deploy:
         provider: pypi
         distributions: sdist bdist_wheel
