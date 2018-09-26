@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+1.0.16
+------
+
+* Bump version 1.0.16
+* Update setuptools on deploy
+* Push bump commit to master
+
 1.0.15
 ------
 
