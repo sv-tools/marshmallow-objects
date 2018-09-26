@@ -53,6 +53,7 @@ def get_info(version):
 
 
 def push():
+    exec_cmd(["git", "push", "origin"])
     exec_cmd(["git", "push", "origin", "--tags"])
 
 
