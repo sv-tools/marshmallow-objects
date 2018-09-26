@@ -33,7 +33,7 @@ jobs:
       after_success: skip
     - stage: deploy
       script: skip
-      install: skip
+      install: pip install --upgrade setuptools
       after_success: echo "Deploy"
       if: tag IS present
       deploy:
