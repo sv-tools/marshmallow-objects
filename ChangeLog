@@ -1,0 +1,94 @@
+CHANGES
+=======
+
+1.0.15
+------
+
+* Bump version 1.0.15
+* Add AUTHORS and ChangeLog files
+* Test with new Marshmallow versions
+* Fix deploy
+* Exclude missing fields in serialized output
+* Fix load\_ini function
+* Use build stages of travis-ci
+* Fix BContext test model
+* Test with Marshmallow v2 and v3
+
+1.0.14
+------
+
+* Override on\_bind\_field and handle\_error methods
+
+1.0.13
+------
+
+* Fix pre/post hooks working
+
+1.0.12
+------
+
+* Fix #29
+
+1.0.11
+------
+
+* Use pbr=4.0.1
+
+1.0.10
+------
+
+* Support "class Meta" options
+
+1.0.9
+-----
+
+* Set description-content-type to text/markdown
+
+1.0.8
+-----
+
+* Supporting Marshmallow's 3.x line
+
+1.0.7
+-----
+
+* Update bump\_version script
+* Add link to Cookbook
+* Add pypi badge
+* Update README.md
+
+1.0.6
+-----
+
+* Add support of fields.Method
+
+1.0.5
+-----
+
+* Push new tag
+* Pass kwargs to ConfigParser.\_\_ini\_\_
+* Support INI
+
+1.0.4
+-----
+
+* Add validate function
+* Auto formatting tool
+* Partial load
+* Many load/dump
+
+1.0.3
+-----
+
+* Add bump\_version tool
+* Support pre/post\_load/dump decorators
+
+1.0.2
+-----
+
+* Check pep8
+* Deploy on python 3.6
+* Deploy to PyPi
+* Create Marshmallow objects/modules package
+* Travis-CI integration
+* Initial commit
