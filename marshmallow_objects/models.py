@@ -1,6 +1,8 @@
 import collections
+import contextlib
 import json
 import pprint
+import threading
 try:
     import configparser
     import io
@@ -22,9 +24,7 @@ MM2 = marshmallow.__version__.startswith('2')
 
 @marshmallow.post_load
 def __make_object__(self, data):
-    obj = self.__model_class__(__post_load__=True, **data)
-    obj.__schema__ = self
-    return obj
+    return self.__model_class__(__post_load__=True, __schema__=self, **data)
 
 
 class ModelMeta(type):
@@ -65,9 +65,16 @@ class ModelMeta(type):
 
     def __call__(cls, *args, **kwargs):
         if kwargs.pop('__post_load__', False):
+            schema = kwargs.pop('__schema__')
             obj = cls.__new__(cls, *args, **kwargs)
+            obj.__dump_lock__ = threading.RLock()
+            obj.__schema__ = schema
+            missing_fields = set(schema._declared_fields.keys())
             for name, value in kwargs.items():
                 setattr(obj, name, value)
+                missing_fields.remove(name)
+            obj.__missing_fields__ = missing_fields
+            obj.__setattr_func__ = obj.__setattr_missing_fields__
             obj.__init__(*args, **kwargs)
         else:
             context = kwargs.pop('context', None)
@@ -89,12 +96,48 @@ class NestedModel(fields.Nested):
 class Model(compat.with_metaclass(ModelMeta)):
     __schema_class__ = marshmallow.Schema
     __schema__ = None
+    __missing_fields__ = None
+    __dump_mode__ = False
+    __dump_lock__ = None
 
     @classmethod
     def __get_schema_class__(cls, **kwargs):
         if MM2:
             kwargs.setdefault('strict', True)
         return cls.__schema_class__(**kwargs)
+
+    def __setattr_default__(self, key, value):
+        super(Model, self).__setattr__(key, value)
+
+    __setattr_func__ = __setattr_default__
+
+    def __setattr__(self, key, value):
+        self.__setattr_func__(key, value)
+
+    def __setattr_missing_fields__(self, key, value):
+        with self.__dump_lock__:
+            if key in self.__missing_fields__:
+                self.__missing_fields__.remove(key)
+        super(Model, self).__setattr__(key, value)
+
+    def __getattribute__(self, item):
+        get = super(Model, self).__getattribute__
+        if get('__dump_mode__'):
+            if item in get('__missing_fields__'):
+                return marshmallow.missing
+        return get(item)
+
+    @contextlib.contextmanager
+    def __dump_mode_on__(self):
+        with self.__dump_lock__:
+            if self.__dump_mode__:
+                yield
+            else:
+                try:
+                    self.__dump_mode__ = True
+                    yield
+                finally:
+                    self.__dump_mode__ = False
 
     def __init__(self, context=None, partial=None, **kwargs):
         pass
@@ -120,10 +163,11 @@ class Model(compat.with_metaclass(ModelMeta)):
         return loaded
 
     def dump(self):
-        dump = self.__schema__.dump(self)
-        if MM2:
-            return dump.data
-        return dump
+        with self.__dump_mode_on__():
+            dump = self.__schema__.dump(self)
+            if MM2:
+                return dump.data
+            return dump
 
     @classmethod
     def load_json(cls,
@@ -141,10 +185,7 @@ class Model(compat.with_metaclass(ModelMeta)):
         return loaded
 
     def dump_json(self):
-        dump = self.__schema__.dumps(self)
-        if MM2:
-            return dump.data
-        return dump
+        return json.dumps(self.dump())
 
     @classmethod
     def load_yaml(cls,
