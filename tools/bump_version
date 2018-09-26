@@ -9,6 +9,7 @@ def exec_cmd(cmd, input=None):
         stdout=subprocess.PIPE,
         stdin=(subprocess.PIPE if input else None))
     stdout, _ = p.communicate(input and input.encode())
+
     return str(stdout, 'utf-8')
 
 
@@ -51,16 +52,36 @@ def get_info(version):
     return new_tag, annotation
 
 
-def bump(tag, annotation):
-    exec_cmd(["git", "tag", "-s", "-F-", tag], input=annotation)
-
-
 def push():
     exec_cmd(["git", "push", "origin", "--tags"])
 
 
 def show(tag):
     return exec_cmd(["git", "show", tag])
+
+
+def create_tag(tag, annotation):
+    exec_cmd(["git", "tag", "-s", "-F-", tag], input=annotation)
+
+
+def delete_tag(tag):
+    exec_cmd(["git", "tag", "-d", tag])
+
+
+def sdist(tag):
+    create_tag(tag, 'sdist')
+    exec_cmd(["python", "setup.py", "sdist"])
+    delete_tag(tag)
+
+
+def bump(tag, annotation):
+    sdist(tag)
+    exec_cmd(["git", "add", "AUTHORS", "ChangeLog"])
+    exec_cmd(["git", "commit", "-m", "Bump version %s" % tag])
+    sdist(tag)
+    exec_cmd(["git", "add", "ChangeLog"])
+    exec_cmd(["git", "commit", "--amend", "--no-edit"])
+    create_tag(tag, annotation)
 
 
 def main(args):
