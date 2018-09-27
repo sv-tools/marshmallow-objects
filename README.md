@@ -1,10 +1,10 @@
-marshmallow-objects
-===================
+# marshmallow-objects
+
 [![Build Status](https://travis-ci.org/SVilgelm/marshmallow-objects.svg?branch=master)](https://travis-ci.org/SVilgelm/marshmallow-objects)
 [![codecov](https://codecov.io/gh/SVilgelm/marshmallow-objects/branch/master/graph/badge.svg)](https://codecov.io/gh/SVilgelm/marshmallow-objects)
 [![PyPI version](https://badge.fury.io/py/marshmallow-objects.svg)](https://badge.fury.io/py/marshmallow-objects)
 
-**Marshmallow Objects and Models**
+## Marshmallow Objects and Models
 
 Serializing/Deserializing Python objects using [Marshmallow](https://github.com/marshmallow-code/marshmallow) library.
 
@@ -36,20 +36,18 @@ print(album.artist.name)
 # David Bowie
 ```
 
-Get It Now
-----------
+## Get It Now
 
 ```bash
 $ pip install -U marshmallow-objects
 ```
 
-Project Links
--------------
+## Project Links
 
 * [Marshmallow](https://github.com/marshmallow-code/marshmallow)
 * [PyPi](https://pypi.python.org/pypi/marshmallow-objects)
 * [Cookbook](https://github.com/SVilgelm/marshmallow-objects/wiki)
 
-License
--------
+## License
+
 MIT licensed. See the bundled [LICENSE](LICENSE) file for more details.
