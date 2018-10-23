@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+1.0.17
+------
+
+* Bump version 1.0.17
+* Support markdown format for project description
+* Test with new vesion of Marshmallow
+
 1.0.16
 ------
 
