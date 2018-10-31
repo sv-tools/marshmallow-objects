@@ -87,10 +87,11 @@ class NestedModel(fields.Nested):
     def __init__(self, nested, **kwargs):
         super(NestedModel, self).__init__(nested.__schema_class__, **kwargs)
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if isinstance(value, Model):
             return value
-        return super(NestedModel, self)._deserialize(value, attr, data)
+        return super(NestedModel, self)._deserialize(value, attr, data,
+                                                     **kwargs)
 
 
 class Model(compat.with_metaclass(ModelMeta)):
