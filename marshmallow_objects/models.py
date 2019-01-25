@@ -238,7 +238,14 @@ class Model(compat.with_metaclass(ModelMeta)):
         return schema.validate(data, many=many, partial=partial)
 
     def __copy__(self):
+        """A magic method to implement shallow copy behavior."""
         return self.__class__.load(self.dump(), context=self.context)
+
+    def __deepcopy__(self, memo):
+        """A magic method to implement deep copy behavior."""
+        obj = self.__class__.load(self.dump(), context=self.context.copy())
+        memo[id(obj)] = obj
+        return obj
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):

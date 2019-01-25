@@ -175,8 +175,10 @@ class TestModel(unittest.TestCase):
     def test_copy(self):
         a1 = A(test_field='1')
         a2 = copy.copy(a1)
-        self.assertNotEqual(id(a1), id(a2))
-        self.assertEqual(a1, a2)
+        a3 = copy.deepcopy(a2)
+        self.assertIs(a1.test_field, a2.test_field, a3.test_field)
+        self.assertNotEqual(id(a1), id(a2), id(a3))
+        self.assertEqual(a1, a2, a3)
 
     def test_repr(self):
         a = A()
