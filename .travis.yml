@@ -10,7 +10,7 @@ python:
   - "2.7"
 
 env:
-  - MARSHMALLOW_VERSION=2.18.1
+  - MARSHMALLOW_VERSION=2.19.1
   - MARSHMALLOW_VERSION=3.0.0rc4
 
 install:
