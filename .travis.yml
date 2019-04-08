@@ -10,8 +10,8 @@ python:
   - "2.7"
 
 env:
-  - MARSHMALLOW_VERSION=2.19.1
-  - MARSHMALLOW_VERSION=3.0.0rc4
+  - MARSHMALLOW_VERSION=2.19.2
+  - MARSHMALLOW_VERSION=3.0.0rc5
 
 install:
   - pip install marshmallow==$MARSHMALLOW_VERSION
