@@ -3,7 +3,7 @@ cache: pip
 branches:
   only:
   - master
-  - /^\d+\.\d+(\.\d+)?$/
+  - /^v\d+\.\d+(\.\d+)?$/
 
 python:
   - "3.6"
@@ -11,7 +11,12 @@ python:
 
 env:
   - MARSHMALLOW_VERSION=2.19.2
-  - MARSHMALLOW_VERSION=3.0.0rc5
+  - MARSHMALLOW_VERSION=3.0.0rc6
+
+matrix:
+  exclude:
+    - python: "2.7"
+      env: MARSHMALLOW_VERSION=3.0.0rc6
 
 install:
   - pip install marshmallow==$MARSHMALLOW_VERSION
