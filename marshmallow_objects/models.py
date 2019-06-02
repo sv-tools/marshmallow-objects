@@ -2,6 +2,7 @@ import collections
 import contextlib
 import json
 import pprint
+import sys
 import threading
 try:
     import configparser
@@ -11,7 +12,6 @@ except ImportError:
     import StringIO as io
 
 import marshmallow
-from marshmallow import compat
 from marshmallow import fields
 try:
     import yaml
@@ -20,6 +20,7 @@ except ImportError:
 
 # Checking Marshmallow version
 MM2 = marshmallow.__version__.startswith('2')
+PY2 = int(sys.version_info[0]) == 2
 
 
 @marshmallow.post_load
@@ -95,7 +96,19 @@ class NestedModel(fields.Nested):
                                                      **kwargs)
 
 
-class Model(compat.with_metaclass(ModelMeta)):
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(meta):  # noqa
+
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+    return type.__new__(metaclass, 'temporary_class', (), {})
+
+
+class Model(with_metaclass(ModelMeta)):
     __schema_class__ = marshmallow.Schema
     __schema__ = None
     __missing_fields__ = None
@@ -206,7 +219,7 @@ class Model(compat.with_metaclass(ModelMeta)):
     @classmethod
     def load_ini(cls, data, context=None, partial=None, **kwargs):
         parser = configparser.ConfigParser(**kwargs)
-        if compat.PY2:
+        if PY2:
             fp = io.StringIO(data)
             parser.readfp(fp)
         else:
