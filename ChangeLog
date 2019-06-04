@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+1.0.20
+------
+
+* Bump version 1.0.20
+* Fix branches regex and bump\_version tool
+* Fix compatability with version 3.0.0rc6
+* Test marshmallow 3.0.0rc6
+* Test 2.19.2 and 3.0.0rc5
+* Test against 2.19.1
+* Test against 2.18.1 and 3.0.0rc4 versions
+
 1.0.19
 ------
 
