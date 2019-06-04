@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import contextlib
 import subprocess
 
 
@@ -13,10 +14,30 @@ def exec_cmd(cmd, input=None):
     return str(stdout, 'utf-8')
 
 
+@contextlib.contextmanager
+def disable_show_signature():
+    local_flag = exec_cmd(
+        ["git", "config", "--local", "--get", "log.showSignature"]
+    ).strip()
+    exec_cmd(
+        ["git", "config", "--local", "log.showSignature",
+         "false"]
+    )
+    yield
+    if local_flag:
+        exec_cmd(
+            ["git", "config", "--local", "log.showSignature", local_flag]
+        )
+    else:
+        exec_cmd(
+            ["git", "config", "--local", "--unset", "log.showSignature"]
+        )
+
+
 def get_diff(tag):
-    return exec_cmd([
+    return [l for l in exec_cmd([
         "git", "log", "--pretty=%h %s", "--no-merges", "{}..HEAD".format(tag)
-    ]).splitlines()
+    ]).splitlines() if not l.startswith("gpg")]
 
 
 def get_last_tag():
@@ -61,8 +82,11 @@ def show(tag):
     return exec_cmd(["git", "show", tag])
 
 
-def create_tag(tag, annotation):
-    exec_cmd(["git", "tag", "-s", "-F-", tag], input=annotation)
+def create_tag(tag, annotation, sign):
+    cmd = ["git", "tag"]
+    if sign:
+        cmd.append("--sign")
+    exec_cmd(cmd + ["-F-", tag], input=annotation)
 
 
 def delete_tag(tag):
@@ -70,27 +94,32 @@ def delete_tag(tag):
 
 
 def sdist(tag):
-    create_tag(tag, 'sdist')
+    create_tag(tag, 'sdist', False)
     exec_cmd(["python", "setup.py", "sdist"])
     delete_tag(tag)
 
 
-def bump(tag, annotation):
+def bump(tag, annotation, sign):
     sdist(tag)
     exec_cmd(["git", "add", "AUTHORS", "ChangeLog"])
-    exec_cmd(["git", "commit", "-m", "Bump version %s" % tag])
+    cmd = ["git", "commit"]
+    if sign:
+        cmd.append("--sign")
+    exec_cmd(cmd + ["-m", "Bump version %s" % tag])
     sdist(tag)
     exec_cmd(["git", "add", "ChangeLog"])
-    exec_cmd(["git", "commit", "--amend", "--no-edit"])
-    create_tag(tag, annotation)
+    exec_cmd(cmd + ["--amend", "--no-edit"])
+    create_tag(tag, annotation, sign)
 
 
 def main(args):
-    tag, annotation = get_info(args.version)
+    with disable_show_signature():
+        tag, annotation = get_info(args.version)
     if args.dry_run:
         print(annotation)
     else:
-        bump(tag, annotation)
+        with disable_show_signature():
+            bump(tag, annotation, args.sign)
         print(show(tag))
 
         a = input('Push new tag? [y/N]: ')
@@ -108,6 +137,12 @@ if __name__ == '__main__':
         help="specify version, otherwise the current version "
         "will be incremented by 1")
     parser.add_argument(
+        '-s',
+        '--sign',
+        action='store_true',
+        help="sign a tag and commits")
+    parser.add_argument(
+        '-r',
         '--dry-run',
         action='store_true',
         help="print tag's number and annotation")

@@ -3,7 +3,7 @@ cache: pip
 branches:
   only:
   - master
-  - /^v\d+\.\d+(\.\d+)?$/
+  - /^\d+\.\d+(\.\d+)?$/
 
 python:
   - "3.6"
