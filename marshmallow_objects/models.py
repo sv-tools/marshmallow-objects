@@ -24,8 +24,9 @@ PY2 = int(sys.version_info[0]) == 2
 
 
 @marshmallow.post_load
-def __make_object__(self, data):
-    return self.__model_class__(__post_load__=True, __schema__=self, **data)
+def __make_object__(self, data, many=None):
+    return self.__model_class__(__post_load__=True, __schema__=self, many=many,
+                                **data)
 
 
 class ModelMeta(type):
@@ -71,17 +72,21 @@ class ModelMeta(type):
             obj = cls.__new__(cls, *args, **kwargs)
             obj.__dump_lock__ = threading.RLock()
             obj.__schema__ = schema
+            many = kwargs.pop("many", None)
             missing_fields = set(schema._declared_fields.keys())
             for name, value in kwargs.items():
                 setattr(obj, name, value)
                 missing_fields.remove(name)
+            if many is not None:
+                kwargs["many"] = many
             obj.__missing_fields__ = missing_fields
             obj.__setattr_func__ = obj.__setattr_missing_fields__
             obj.__init__(*args, **kwargs)
         else:
             context = kwargs.pop('context', None)
             partial = kwargs.pop('partial', None)
-            obj = cls.load(kwargs, context=context, partial=partial)
+            many = kwargs.pop('many', None)
+            obj = cls.load(kwargs, context=context, many=many, partial=partial)
         return obj
 
 
@@ -154,7 +159,7 @@ class Model(with_metaclass(ModelMeta)):
                 finally:
                     self.__dump_mode__ = False
 
-    def __init__(self, context=None, partial=None, **kwargs):
+    def __init__(self, context=None, many=None, partial=None, **kwargs):
         pass
 
     @property
