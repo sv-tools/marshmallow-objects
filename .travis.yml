@@ -11,12 +11,12 @@ python:
 
 env:
   - MARSHMALLOW_VERSION=2.19.2
-  - MARSHMALLOW_VERSION=3.0.0rc6
+  - MARSHMALLOW_VERSION=3.0.0
 
 matrix:
   exclude:
     - python: "2.7"
-      env: MARSHMALLOW_VERSION=3.0.0rc6
+      env: MARSHMALLOW_VERSION=3.0.0
 
 install:
   - pip install marshmallow==$MARSHMALLOW_VERSION

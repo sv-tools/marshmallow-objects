@@ -18,7 +18,7 @@ class A(marshmallow.Model):
     tag_field = marshmallow.fields.Str(load_only=True)
 
     @marshmallow.post_load
-    def set_tag_field(self, data):
+    def set_tag_field(self, data, **kwargs):
         data.tag_field = data.test_field
         return data
 
