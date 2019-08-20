@@ -54,6 +54,10 @@ class C(marshmallow.Model):
     a = marshmallow.NestedModel(A, many=True)
 
 
+class MultiInheritance(A, B, C):
+    pass
+
+
 def serialize_context_field(obj, context=None):
     return obj.test_field == context['value']
 
@@ -80,27 +84,43 @@ class TestModelMeta(unittest.TestCase):
 
     def test_schema_class(self):
         assert issubclass(A.__schema_class__, marshmallow.Schema)
+        assert issubclass(
+            MultiInheritance.__schema_class__, marshmallow.Schema)
 
     def test_model_class(self):
         assert issubclass(A.__schema_class__.__model_class__,
                           marshmallow.Model)
+        assert issubclass(
+            MultiInheritance.__schema_class__.__model_class__,
+            marshmallow.Model)
 
     def test_tag_processor(self):
         assert hasattr(A.__schema_class__, 'set_tag_field')
+        assert hasattr(MultiInheritance.__schema_class__, 'set_tag_field')
 
     def test_meta(self):
         assert hasattr(A.__schema_class__, 'Meta')
         self.assertEqual(id(A.Meta), id(A.__schema_class__.Meta))
         assert not hasattr(B, 'Meta')
         assert hasattr(B.__schema_class__, 'Meta')
+        self.assertEqual(
+            id(MultiInheritance.Meta),
+            id(MultiInheritance.__schema_class__.Meta))
+        assert hasattr(MultiInheritance.__schema_class__, 'Meta')
 
     def test_on_bind_filed(self):
         self.assertEqual(
             id(A.on_bind_field), id(A.__schema_class__.on_bind_field))
+        self.assertEqual(
+            id(MultiInheritance.on_bind_field),
+            id(MultiInheritance.__schema_class__.on_bind_field))
 
     def test_handle_error(self):
         self.assertEqual(
             id(A.handle_error), id(A.__schema_class__.handle_error))
+        self.assertEqual(
+            id(MultiInheritance.handle_error),
+            id(MultiInheritance.__schema_class__.handle_error))
 
 
 class TestModel(unittest.TestCase):
