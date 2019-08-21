@@ -5,10 +5,9 @@ import subprocess
 
 
 def exec_cmd(cmd, input=None):
-    p = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stdin=(subprocess.PIPE if input else None))
+    p = subprocess.Popen(cmd,
+                         stdout=subprocess.PIPE,
+                         stdin=(subprocess.PIPE if input else None))
     stdout, _ = p.communicate(input and input.encode())
 
     return str(stdout, 'utf-8')
@@ -17,27 +16,22 @@ def exec_cmd(cmd, input=None):
 @contextlib.contextmanager
 def disable_show_signature():
     local_flag = exec_cmd(
-        ["git", "config", "--local", "--get", "log.showSignature"]
-    ).strip()
-    exec_cmd(
-        ["git", "config", "--local", "log.showSignature",
-         "false"]
-    )
+        ["git", "config", "--local", "--get", "log.showSignature"]).strip()
+    exec_cmd(["git", "config", "--local", "log.showSignature", "false"])
     yield
     if local_flag:
-        exec_cmd(
-            ["git", "config", "--local", "log.showSignature", local_flag]
-        )
+        exec_cmd(["git", "config", "--local", "log.showSignature", local_flag])
     else:
-        exec_cmd(
-            ["git", "config", "--local", "--unset", "log.showSignature"]
-        )
+        exec_cmd(["git", "config", "--local", "--unset", "log.showSignature"])
 
 
 def get_diff(tag):
-    return [l for l in exec_cmd([
-        "git", "log", "--pretty=%h %s", "--no-merges", "{}..HEAD".format(tag)
-    ]).splitlines() if not l.startswith("gpg")]
+    return [
+        l for l in exec_cmd([
+            "git", "log", "--pretty=%h %s", "--no-merges", "{}..HEAD".format(
+                tag)
+        ]).splitlines() if not l.startswith("gpg")
+    ]
 
 
 def get_last_tag():
@@ -61,15 +55,14 @@ def get_info(version):
     new_tag = version or str_tag(inc_tag(last_tag))
 
     subject = "Version {}".format(new_tag)
-    changes = '\n'.join(
-        '* {}'.format(line) for line in get_diff(str_tag(last_tag)))
+    changes = '\n'.join('* {}'.format(line)
+                        for line in get_diff(str_tag(last_tag)))
 
     annotation = """{subject}
 {sep}
 
 {changes}
-""".format(
-        subject=subject, sep='-' * len(subject), changes=changes)
+""".format(subject=subject, sep='-' * len(subject), changes=changes)
     return new_tag, annotation
 
 
@@ -131,21 +124,18 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'version',
-        nargs='?',
-        help="specify version, otherwise the current version "
-        "will be incremented by 1")
-    parser.add_argument(
-        '-s',
-        '--sign',
-        action='store_true',
-        help="sign a tag and commits")
-    parser.add_argument(
-        '-r',
-        '--dry-run',
-        action='store_true',
-        help="print tag's number and annotation")
+    parser.add_argument('version',
+                        nargs='?',
+                        help="specify version, otherwise the current version "
+                        "will be incremented by 1")
+    parser.add_argument('-s',
+                        '--sign',
+                        action='store_true',
+                        help="sign a tag and commits")
+    parser.add_argument('-r',
+                        '--dry-run',
+                        action='store_true',
+                        help="print tag's number and annotation")
 
     args = parser.parse_args()
 
