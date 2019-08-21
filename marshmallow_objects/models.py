@@ -54,13 +54,17 @@ class ModelMeta(type):
                                                        'handle_error'):
                 schema_fields[key] = value
 
-        parent_schema = cls.__schema_class__ or marshmallow.Schema
+        parent_schemas = []
         if parents:
             for parent in parents:
                 if issubclass(parent, Model):
-                    parent_schema = parent.__schema_class__
-                    break
-        schema_class = type(name + 'Schema', (parent_schema, ), schema_fields)
+                    parent_schemas.append(parent.__schema_class__)
+        parent_schemas = (
+                parent_schemas
+                or [cls.__schema_class__ or marshmallow.Schema]
+        )
+        schema_class = type(
+            name + 'Schema', tuple(parent_schemas), schema_fields)
         cls.__schema_class__ = schema_class
 
         return cls
