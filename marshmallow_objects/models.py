@@ -24,7 +24,7 @@ PY2 = int(sys.version_info[0]) == 2
 
 
 @marshmallow.post_load
-def __make_object__(self, data):
+def __make_object__(self, data, **kwargs):
     return self.__model_class__(__post_load__=True, __schema__=self, **data)
 
 
