@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+1.0.21
+------
+
+* Bump version 1.0.21
+* Autoformat
+* Fix model multi inheritance
+* Fix compatability with version 3.0.0
+
 1.0.20
 ------
 
