@@ -59,12 +59,10 @@ class ModelMeta(type):
             for parent in parents:
                 if issubclass(parent, Model):
                     parent_schemas.append(parent.__schema_class__)
-        parent_schemas = (
-                parent_schemas
-                or [cls.__schema_class__ or marshmallow.Schema]
-        )
-        schema_class = type(
-            name + 'Schema', tuple(parent_schemas), schema_fields)
+        parent_schemas = (parent_schemas
+                          or [cls.__schema_class__ or marshmallow.Schema])
+        schema_class = type(name + 'Schema', tuple(parent_schemas),
+                            schema_fields)
         cls.__schema_class__ = schema_class
 
         return cls
@@ -102,13 +100,14 @@ class NestedModel(fields.Nested):
 
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass."""
+
     # This requires a bit of explanation: the basic idea is to make a dummy
     # metaclass for one level of class instantiation that replaces itself with
     # the actual metaclass.
     class metaclass(meta):  # noqa
-
         def __new__(cls, name, this_bases, d):
             return meta(name, bases, d)
+
     return type.__new__(metaclass, 'temporary_class', (), {})
 
 
@@ -197,8 +196,11 @@ class Model(with_metaclass(ModelMeta)):
                   *args,
                   **kwargs):
         schema = cls.__get_schema_class__(context=context)
-        loaded = schema.loads(
-            data, many=many, partial=partial, *args, **kwargs)
+        loaded = schema.loads(data,
+                              many=many,
+                              partial=partial,
+                              *args,
+                              **kwargs)
         if MM2:
             return loaded[0]
         return loaded
@@ -314,5 +316,7 @@ def dump_many_yaml(data,
                    *args,
                    **kwargs):
     ret = dump_many(data, context)
-    return yaml.dump(
-        ret, default_flow_style=default_flow_style, *args, **kwargs)
+    return yaml.dump(ret,
+                     default_flow_style=default_flow_style,
+                     *args,
+                     **kwargs)

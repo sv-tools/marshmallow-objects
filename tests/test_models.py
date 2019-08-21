@@ -84,15 +84,14 @@ class TestModelMeta(unittest.TestCase):
 
     def test_schema_class(self):
         assert issubclass(A.__schema_class__, marshmallow.Schema)
-        assert issubclass(
-            MultiInheritance.__schema_class__, marshmallow.Schema)
+        assert issubclass(MultiInheritance.__schema_class__,
+                          marshmallow.Schema)
 
     def test_model_class(self):
         assert issubclass(A.__schema_class__.__model_class__,
                           marshmallow.Model)
-        assert issubclass(
-            MultiInheritance.__schema_class__.__model_class__,
-            marshmallow.Model)
+        assert issubclass(MultiInheritance.__schema_class__.__model_class__,
+                          marshmallow.Model)
 
     def test_tag_processor(self):
         assert hasattr(A.__schema_class__, 'set_tag_field')
@@ -103,24 +102,21 @@ class TestModelMeta(unittest.TestCase):
         self.assertEqual(id(A.Meta), id(A.__schema_class__.Meta))
         assert not hasattr(B, 'Meta')
         assert hasattr(B.__schema_class__, 'Meta')
-        self.assertEqual(
-            id(MultiInheritance.Meta),
-            id(MultiInheritance.__schema_class__.Meta))
+        self.assertEqual(id(MultiInheritance.Meta),
+                         id(MultiInheritance.__schema_class__.Meta))
         assert hasattr(MultiInheritance.__schema_class__, 'Meta')
 
     def test_on_bind_filed(self):
-        self.assertEqual(
-            id(A.on_bind_field), id(A.__schema_class__.on_bind_field))
-        self.assertEqual(
-            id(MultiInheritance.on_bind_field),
-            id(MultiInheritance.__schema_class__.on_bind_field))
+        self.assertEqual(id(A.on_bind_field),
+                         id(A.__schema_class__.on_bind_field))
+        self.assertEqual(id(MultiInheritance.on_bind_field),
+                         id(MultiInheritance.__schema_class__.on_bind_field))
 
     def test_handle_error(self):
-        self.assertEqual(
-            id(A.handle_error), id(A.__schema_class__.handle_error))
-        self.assertEqual(
-            id(MultiInheritance.handle_error),
-            id(MultiInheritance.__schema_class__.handle_error))
+        self.assertEqual(id(A.handle_error),
+                         id(A.__schema_class__.handle_error))
+        self.assertEqual(id(MultiInheritance.handle_error),
+                         id(MultiInheritance.__schema_class__.handle_error))
 
 
 class TestModel(unittest.TestCase):
@@ -371,12 +367,11 @@ class TestMany(unittest.TestCase):
         self.assertRaises(marshmallow.ValidationError, B.load, self.data)
 
     def test_load_many_partial(self):
-        self.assertRaises(
-            marshmallow.ValidationError,
-            B.load,
-            data=[{}, {}],
-            many=True,
-            partial=False)
+        self.assertRaises(marshmallow.ValidationError,
+                          B.load,
+                          data=[{}, {}],
+                          many=True,
+                          partial=False)
         bb = B.load([{}, {}], many=True, partial=True)
         self.assertEqual(2, len(bb))
         for b in bb:
@@ -406,8 +401,9 @@ class TestMany(unittest.TestCase):
         self.assertEqual([self.data, adata], ddata)
 
     def test_dump_fake(self):
-        self.assertRaises(
-            marshmallow.ValidationError, marshmallow.dump_many, data='fake')
+        self.assertRaises(marshmallow.ValidationError,
+                          marshmallow.dump_many,
+                          data='fake')
 
     def test_dump_context(self):
         context = {'value': 'bar'}
