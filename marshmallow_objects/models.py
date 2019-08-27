@@ -25,7 +25,9 @@ PY2 = int(sys.version_info[0]) == 2
 
 @marshmallow.post_load
 def __make_object__(self, data, **kwargs):
-    return self.__model_class__(__post_load__=True, __schema__=self, **data)
+    data["many"] = kwargs.pop("many", None)
+    return self.__model_class__(
+        __post_load__=True, __schema__=self, **data)
 
 
 class ModelMeta(type):
@@ -69,6 +71,7 @@ class ModelMeta(type):
 
     def __call__(cls, *args, **kwargs):
         if kwargs.pop('__post_load__', False):
+            kwargs.pop("many")
             schema = kwargs.pop('__schema__')
             obj = cls.__new__(cls, *args, **kwargs)
             obj.__dump_lock__ = threading.RLock()
@@ -83,7 +86,8 @@ class ModelMeta(type):
         else:
             context = kwargs.pop('context', None)
             partial = kwargs.pop('partial', None)
-            obj = cls.load(kwargs, context=context, partial=partial)
+            many = kwargs.pop("many", None)
+            obj = cls.load(kwargs, many=many, context=context, partial=partial)
         return obj
 
 
@@ -92,6 +96,8 @@ class NestedModel(fields.Nested):
         super(NestedModel, self).__init__(nested.__schema_class__, **kwargs)
 
     def _deserialize(self, value, attr, data, **kwargs):
+        if self.many and value and isinstance(value[0], Model):
+            return value
         if isinstance(value, Model):
             return value
         return super(NestedModel, self)._deserialize(value, attr, data,

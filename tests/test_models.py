@@ -148,6 +148,19 @@ class TestModel(unittest.TestCase):
         c = C(a=[dict(test_field='1'), dict(test_field='2')])
         self.assertEqual(2, len(c.a))
 
+    def test_nested_model_many(self):
+        c = C(a=[A(test_field='1'), A(test_field='2')])
+        self.assertEqual(2, len(c.a))
+
+    def test_load_model_many(self):
+        a_list = A.load(
+            [dict(test_field='1'), dict(test_field='2')],
+            many=True
+        )
+        self.assertEqual(2, len(a_list))
+        self.assertEqual('1', a_list[0].test_field)
+        self.assertEqual('2', a_list[1].test_field)
+
     def test_partial(self):
         self.assertRaises(marshmallow.ValidationError, B)
         b = B(partial=True)
