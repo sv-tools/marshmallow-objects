@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+1.0.22
+------
+
+* Bump version 1.0.22
+* FIx load of nested many models
+
 1.0.21
 ------
 
