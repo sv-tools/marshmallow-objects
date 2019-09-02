@@ -71,7 +71,7 @@ class ModelMeta(type):
 
     def __call__(cls, *args, **kwargs):
         if kwargs.pop('__post_load__', False):
-            kwargs.pop("many")
+            kwargs.pop("many", None)
             schema = kwargs.pop('__schema__')
             obj = cls.__new__(cls, *args, **kwargs)
             obj.__dump_lock__ = threading.RLock()
