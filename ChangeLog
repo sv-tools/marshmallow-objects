@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+1.0.23
+------
+
+* Bump version 1.0.23
+* Fix: pop 'many' from kwargs with default to avoid error if this keyword is not into kwargs
+
 1.0.22
 ------
 
