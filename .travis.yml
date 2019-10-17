@@ -7,23 +7,9 @@ branches:
 
 python:
   - "3.6"
-  - "2.7"
-
-env:
-  - MARSHMALLOW_VERSION=2.19.2
-  - MARSHMALLOW_VERSION=3.0.0
-
-matrix:
-  exclude:
-    - python: "2.7"
-      env: MARSHMALLOW_VERSION=3.0.0
 
 install:
-  - pip install marshmallow==$MARSHMALLOW_VERSION
   - pip install -r requirements.txt -r test-requirements.txt
-
-script: coverage run --source=marshmallow_objects setup.py test
-after_success: codecov
 
 stages:
   - pep8
@@ -36,6 +22,9 @@ jobs:
       script: flake8 --show-source
       install: pip install flake8
       after_success: skip
+    - stage: test
+      script: coverage run --source=marshmallow_objects setup.py test
+      after_success: codecov
     - stage: deploy
       script: skip
       install: skip
