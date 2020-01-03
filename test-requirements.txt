@@ -1,3 +1,5 @@
 pyyaml
 coverage
 codecov
+black
+flake8

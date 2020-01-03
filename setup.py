@@ -2,4 +2,4 @@
 
 import setuptools
 
-setuptools.setup(setup_requires=['pbr>=5.2.1'], pbr=True)
+setuptools.setup(setup_requires=["pbr>=5.2.1"], pbr=True)

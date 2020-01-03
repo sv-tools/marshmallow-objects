@@ -2,14 +2,11 @@ language: python
 cache: pip
 branches:
   only:
-  - master
-  - /^\d+\.\d+(\.\d+)?$/
+    - master
+    - /^\d+\.\d+(\.\d+)?$/
 
 python:
-  - "3.6"
-
-install:
-  - pip install -r requirements.txt -r test-requirements.txt
+  - "3.7"
 
 stages:
   - pep8
@@ -19,23 +16,26 @@ stages:
 jobs:
   include:
     - stage: pep8
+      name: flake8
+      install: pip install -r test-requirements.txt
       script: flake8 --show-source
-      install: pip install flake8
-      after_success: skip
+    - name: black
+      install: pip install -r test-requirements.txt
+      script: black --check $(git diff --name-only --diff-filter=AM ${TRAVIS_BRANCH} -- "*.py")
+
     - stage: test
+      install: pip install -r requirements.txt -r test-requirements.txt
       script: coverage run --source=marshmallow_objects setup.py test
       after_success: codecov
+
     - stage: deploy
-      script: skip
-      install: skip
-      after_success: echo "Deploy"
       if: tag IS present
       deploy:
         provider: pypi
         distributions: sdist bdist_wheel
         user: svilgelm
         password:
-            secure: qkNXzEFF6uMct0puHZ2Yd1pmNrIwjnrzdOzT3zyd2wIHUaUaFBDCpjRdBamelmyl5/MIFHi7LQKTTnE1t5PzhUYJEaVYovYmH9c6zI/P0PUliZt6FbRLWkB+7ZCkQ7V9b2NJNVN2LJk7tTR3t3X3/n+hAnTZtIZ9hD9FnBwHYwD65UCXlCLV6+hPP4q/lWFH3W7ui/0/ymVnvxp0/GL+wX2hr2LpxZx3Gy3t2xcakM3QwyuQVHXpoMiLuKUCLZJTfcACWaFqjyKEyR+vOnFFHIHZBUBmvkhTsZ04H4gjkQjn+LM/eG6z62xk4rBjQKnsu5xSnperTWkYVhlebzXSmz98VrRntJ5Ixr2n7UhP1gep+G+JbinomQshti+mVEgfJOnhKD28Ni2iWKSci0WA9xjk9+aAyWd4YuVpus/2da7heMBMdW1vxtukBj9pliR22kZfaWsUH39nyQPgIwEQhPFqzuQPx/pp2gOIV5sN+YBpjqLAb1sNlHz2RDP3xnX3r6uiirx/AXORUHbbxHbtIB5NI2wMuIMrlAkOtQod+mH74mudNKtXh1EL8ydiNwal5gJYgFRZbGuxNlBxQ3N64Oe7djWLZJpm9ELD8e0xfVyRMjymKa+8wGXbYz5HGADCedrCJuibI7qz41KOTu7WK7RUK9reC7BzP4CuIWIS1fY=
+          secure: qkNXzEFF6uMct0puHZ2Yd1pmNrIwjnrzdOzT3zyd2wIHUaUaFBDCpjRdBamelmyl5/MIFHi7LQKTTnE1t5PzhUYJEaVYovYmH9c6zI/P0PUliZt6FbRLWkB+7ZCkQ7V9b2NJNVN2LJk7tTR3t3X3/n+hAnTZtIZ9hD9FnBwHYwD65UCXlCLV6+hPP4q/lWFH3W7ui/0/ymVnvxp0/GL+wX2hr2LpxZx3Gy3t2xcakM3QwyuQVHXpoMiLuKUCLZJTfcACWaFqjyKEyR+vOnFFHIHZBUBmvkhTsZ04H4gjkQjn+LM/eG6z62xk4rBjQKnsu5xSnperTWkYVhlebzXSmz98VrRntJ5Ixr2n7UhP1gep+G+JbinomQshti+mVEgfJOnhKD28Ni2iWKSci0WA9xjk9+aAyWd4YuVpus/2da7heMBMdW1vxtukBj9pliR22kZfaWsUH39nyQPgIwEQhPFqzuQPx/pp2gOIV5sN+YBpjqLAb1sNlHz2RDP3xnX3r6uiirx/AXORUHbbxHbtIB5NI2wMuIMrlAkOtQod+mH74mudNKtXh1EL8ydiNwal5gJYgFRZbGuxNlBxQ3N64Oe7djWLZJpm9ELD8e0xfVyRMjymKa+8wGXbYz5HGADCedrCJuibI7qz41KOTu7WK7RUK9reC7BzP4CuIWIS1fY=
         on:
           tags: true
           branch: master

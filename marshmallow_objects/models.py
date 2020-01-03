@@ -8,6 +8,7 @@ import io
 
 import marshmallow
 from marshmallow import fields
+
 try:
     import yaml
 except ImportError:
@@ -17,34 +18,32 @@ except ImportError:
 @marshmallow.post_load
 def __make_object__(self, data, **kwargs):
     data["many"] = kwargs.pop("many", None)
-    return self.__model_class__(
-        __post_load__=True, __schema__=self, **data)
+    return self.__model_class__(__post_load__=True, __schema__=self, **data)
 
 
 class ModelMeta(type):
     def __new__(mcs, name, parents, dct):
-        if '__schema_class__' not in dct:
-            dct['__schema_class__'] = None
+        if "__schema_class__" not in dct:
+            dct["__schema_class__"] = None
         cls = super(ModelMeta, mcs).__new__(mcs, name, parents, dct)
 
         schema_fields = {
-            '__make_object__': __make_object__,
-            '__model_class__': cls,
+            "__make_object__": __make_object__,
+            "__model_class__": cls,
         }
         for key, value in dct.items():
             if isinstance(value, fields.Field):
                 schema_fields[key] = value
                 setattr(cls, key, None)
                 if isinstance(value, fields.Method):
-                    for method_name in (value.serialize_method_name,
-                                        value.deserialize_method_name):
+                    for method_name in (
+                        value.serialize_method_name,
+                        value.deserialize_method_name,
+                    ):
                         if method_name is not None:
                             schema_fields[method_name] = dct[method_name]
 
-            elif hasattr(
-                    value,
-                    '__marshmallow_hook__') or key in ('Meta', 'on_bind_field',
-                                                       'handle_error'):
+            elif hasattr(value, "__marshmallow_hook__") or key in ("Meta", "on_bind_field", "handle_error",):
                 schema_fields[key] = value
 
         parent_schemas = []
@@ -52,19 +51,17 @@ class ModelMeta(type):
             for parent in parents:
                 if issubclass(parent, Model):
                     parent_schemas.append(parent.__schema_class__)
-        parent_schemas = (parent_schemas
-                          or [cls.__schema_class__ or marshmallow.Schema])
-        schema_class = type(name + 'Schema', tuple(parent_schemas),
-                            schema_fields)
+        parent_schemas = parent_schemas or [cls.__schema_class__ or marshmallow.Schema]
+        schema_class = type(name + "Schema", tuple(parent_schemas), schema_fields)
         cls.__schema_class__ = schema_class
 
         return cls
 
     def __call__(cls, *args, **kwargs):
-        if kwargs.pop('__post_load__', False):
+        if kwargs.pop("__post_load__", False):
             kwargs.pop("many", None)
             kwargs.pop("unknown", None)
-            schema = kwargs.pop('__schema__')
+            schema = kwargs.pop("__schema__")
             obj = cls.__new__(cls, *args, **kwargs)
             obj.__dump_lock__ = threading.RLock()
             obj.__schema__ = schema
@@ -76,17 +73,11 @@ class ModelMeta(type):
             obj.__setattr_func__ = obj.__setattr_missing_fields__
             obj.__init__(*args, **kwargs)
         else:
-            context = kwargs.pop('context', None)
-            partial = kwargs.pop('partial', None)
+            context = kwargs.pop("context", None)
+            partial = kwargs.pop("partial", None)
             many = kwargs.pop("many", None)
-            unknown = kwargs.pop('unknown', None)
-            obj = cls.load(
-                kwargs,
-                many=many,
-                context=context,
-                partial=partial,
-                unknown=unknown
-            )
+            unknown = kwargs.pop("unknown", None)
+            obj = cls.load(kwargs, many=many, context=context, partial=partial, unknown=unknown,)
         return obj
 
 
@@ -99,8 +90,7 @@ class NestedModel(fields.Nested):
             return value
         if isinstance(value, Model):
             return value
-        return super(NestedModel, self)._deserialize(value, attr, data,
-                                                     **kwargs)
+        return super(NestedModel, self)._deserialize(value, attr, data, **kwargs)
 
 
 def with_metaclass(meta, *bases):
@@ -113,7 +103,7 @@ def with_metaclass(meta, *bases):
         def __new__(cls, name, this_bases, d):
             return meta(name, bases, d)
 
-    return type.__new__(metaclass, 'temporary_class', (), {})
+    return type.__new__(metaclass, "temporary_class", (), {})
 
 
 class Model(with_metaclass(ModelMeta)):
@@ -143,8 +133,8 @@ class Model(with_metaclass(ModelMeta)):
 
     def __getattribute__(self, item):
         get = super(Model, self).__getattribute__
-        if get('__dump_mode__'):
-            if item in get('__missing_fields__'):
+        if get("__dump_mode__"):
+            if item in get("__missing_fields__"):
                 return marshmallow.missing
         return get(item)
 
@@ -215,43 +205,22 @@ class Model(with_metaclass(ModelMeta)):
             return dump
 
     @classmethod
-    def load_json(cls,
-                  data,
-                  context=None,
-                  many=None,
-                  partial=None,
-                  unknown=None,
-                  *args,
-                  **kwargs):
+    def load_json(
+        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs,
+    ):
         schema = cls.__get_schema_class__(context=context)
-        loaded = schema.loads(data,
-                              many=many,
-                              partial=partial,
-                              unknown=unknown,
-                              *args,
-                              **kwargs)
+        loaded = schema.loads(data, many=many, partial=partial, unknown=unknown, *args, **kwargs)
         return loaded
 
     def dump_json(self):
         return json.dumps(self.dump())
 
     @classmethod
-    def load_yaml(cls,
-                  data,
-                  context=None,
-                  many=None,
-                  partial=None,
-                  unknown=None,
-                  *args,
-                  **kwargs):
+    def load_yaml(
+        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs,
+    ):
         loaded = yaml.load(data, Loader=yaml.FullLoader)
-        return cls.load(
-            loaded,
-            context=context,
-            many=many,
-            partial=partial,
-            unknown=unknown
-        )
+        return cls.load(loaded, context=context, many=many, partial=partial, unknown=unknown,)
 
     def dump_yaml(self, default_flow_style=False):
         return yaml.dump(self.dump(), default_flow_style=default_flow_style)
@@ -272,7 +241,7 @@ class Model(with_metaclass(ModelMeta)):
                 data[key] = value
             else:
                 default_data[key] = value
-        kwargs['defaults'] = default_data
+        kwargs["defaults"] = default_data
         parser = configparser.ConfigParser(**kwargs)
         parser._sections = data
         fp = io.StringIO()
@@ -281,7 +250,7 @@ class Model(with_metaclass(ModelMeta)):
 
     @classmethod
     def validate(cls, data, context=None, many=None, partial=None):
-        kwargs = {'context': context}
+        kwargs = {"context": context}
         schema = cls.__get_schema_class__(**kwargs)
         return schema.validate(data, many=many, partial=partial)
 
@@ -320,13 +289,12 @@ def dump_many(data, context=None):
                 schema = obj.__get_schema_class__(context=context)
             obj_data = schema.dump(obj)
             ret.append(obj_data)
-        elif (isinstance(obj, collections.Sequence)
-              and not isinstance(obj, str)):
+        elif isinstance(obj, collections.Sequence) and not isinstance(obj, str):
             ret.append(dump_many(obj, context=context))
         else:
             raise marshmallow.ValidationError(
-                "The object '%s' is not an instance of Model class" % obj,
-                data=data)
+                "The object '%s' is not an instance of Model class" % obj, data=data,
+            )
 
     return ret
 
@@ -336,13 +304,6 @@ def dump_many_json(data, context=None, *args, **kwargs):
     return json.dumps(ret, *args, **kwargs)
 
 
-def dump_many_yaml(data,
-                   context=None,
-                   default_flow_style=False,
-                   *args,
-                   **kwargs):
+def dump_many_yaml(data, context=None, default_flow_style=False, *args, **kwargs):
     ret = dump_many(data, context)
-    return yaml.dump(ret,
-                     default_flow_style=default_flow_style,
-                     *args,
-                     **kwargs)
+    return yaml.dump(ret, default_flow_style=default_flow_style, *args, **kwargs)
