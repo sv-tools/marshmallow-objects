@@ -28,7 +28,7 @@ class A(marshmallow.Model):
     def on_bind_field(self, field_name, field_obj):
         pass
 
-    def handle_error(self, error, data):
+    def handle_error(self, error, data, many, partial):
         pass
 
 
@@ -289,7 +289,7 @@ class TestModelLoadDump(unittest.TestCase):
     @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
     def test_dump_yaml(self):
         a = A(test_field='foo')
-        ydata = yaml.load(a.dump_yaml())
+        ydata = yaml.load(a.dump_yaml(), Loader=yaml.UnsafeLoader)
         self.assertEqual(self.data, ydata)
 
     def test_dump_ordered(self):
@@ -297,6 +297,18 @@ class TestModelLoadDump(unittest.TestCase):
         b = B(test_field='foo', a=dict(test_field='bar')).dump()
         self.assertIsInstance(a, collections.OrderedDict)
         self.assertIsInstance(b, dict)
+
+    def test_load_unknwon(self):
+        data = dict(
+            test_field='foo',
+            unknown_b="B",
+            a=dict(test_field='bar', unknown_b="B")
+        )
+        with self.assertRaises(marshmallow.ValidationError):
+            B.load(data)
+        b = B.load(data, unknown=marshmallow.EXCLUDE)
+        self.assertEqual(b.test_field, 'foo')
+        self.assertEqual(b.a.test_field, 'bar')
 
 
 class TestContext(unittest.TestCase):
@@ -439,7 +451,7 @@ class TestMany(unittest.TestCase):
     def test_dump_yaml(self):
         bb = B.load(self.data, many=True)
         ydata = marshmallow.dump_many_yaml(bb)
-        ddata = yaml.load(ydata)
+        ddata = yaml.load(ydata, Loader=yaml.UnsafeLoader)
         self.assertEqual(self.data, ddata)
 
 

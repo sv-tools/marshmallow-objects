@@ -1,6 +1,8 @@
 CHANGES
 =======
 
+* Drop support for marshmallow 2
+
 1.0.23
 ------
 
