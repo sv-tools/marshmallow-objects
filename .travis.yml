@@ -29,6 +29,7 @@ jobs:
       after_success: codecov
 
     - stage: deploy
+      script: skip
       if: tag IS present
       deploy:
         provider: pypi
