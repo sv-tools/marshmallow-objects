@@ -176,9 +176,37 @@ class Model(with_metaclass(ModelMeta)):
         self.__schema__.context = value
 
     @classmethod
+    def _override_unknown(cls, schema, unknown):
+        setattr(schema, "_initial_unknown", schema.unknown)
+        schema.unknown = unknown
+        for field in schema.fields.values():
+            if isinstance(field, fields.Nested):
+                cls._override_unknown(field.schema, unknown)
+
+    @classmethod
+    def _restore_unknown(cls, schema):
+        if hasattr(schema, "_initial_unknown"):
+            schema.unknown = getattr(schema, "_initial_unknown")
+            delattr(schema, "_initial_unknown")
+        for field in schema.fields.values():
+            if isinstance(field, fields.Nested):
+                cls._restore_unknown(field.schema)
+
+    @classmethod
+    @contextlib.contextmanager
+    def propagate_unknwown(cls, schema, unknown=None):
+        if unknown:
+            cls._override_unknown(schema, unknown)
+            yield
+            cls._restore_unknown(schema)
+        else:
+            yield
+
+    @classmethod
     def load(cls, data, context=None, many=None, partial=None, unknown=None):
         schema = cls.__get_schema_class__(context=context, partial=partial)
-        loaded = schema.load(data, many=many, unknown=unknown)
+        with cls.propagate_unknwown(schema, unknown):
+            loaded = schema.load(data, many=many)
         return loaded
 
     def dump(self):
