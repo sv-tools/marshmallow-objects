@@ -289,7 +289,7 @@ class TestModelLoadDump(unittest.TestCase):
     @unittest.skipIf(skip_yaml, 'PyYaml is not installed')
     def test_dump_yaml(self):
         a = A(test_field='foo')
-        ydata = yaml.load(a.dump_yaml(), Loader=yaml.FullLoader)
+        ydata = yaml.load(a.dump_yaml(), Loader=yaml.UnsafeLoader)
         self.assertEqual(self.data, ydata)
 
     def test_dump_ordered(self):
@@ -451,7 +451,7 @@ class TestMany(unittest.TestCase):
     def test_dump_yaml(self):
         bb = B.load(self.data, many=True)
         ydata = marshmallow.dump_many_yaml(bb)
-        ddata = yaml.load(ydata, Loader=yaml.FullLoader)
+        ddata = yaml.load(ydata, Loader=yaml.UnsafeLoader)
         self.assertEqual(self.data, ddata)
 
 
