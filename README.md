@@ -1,8 +1,9 @@
 # marshmallow-objects
 
-[![Test](https://github.com/SVilgelm/marshmallow-objects/workflows/Test%20Master%20Branch/badge.svg)](https://github.com/SVilgelm/marshmallow-objects/actions?query=workflow%3A%22Test+Master+Branch%22)
-[![codecov](https://codecov.io/gh/SVilgelm/marshmallow-objects/branch/master/graph/badge.svg)](https://codecov.io/gh/SVilgelm/marshmallow-objects)
-[![PyPI version](https://badge.fury.io/py/marshmallow-objects.svg)](https://badge.fury.io/py/marshmallow-objects)
+[![Test](https://img.shields.io/github/workflow/status/SVilgelm/marshmallow-objects/Test%20Master%20Branch)](https://github.com/SVilgelm/marshmallow-objects/actions?query=workflow%3A%22Test+Master+Branch%22)
+[![Codecov](https://img.shields.io/codecov/c/github/SVilgelm/marshmallow-objects)](https://codecov.io/gh/SVilgelm/marshmallow-objects)
+[![Version](https://img.shields.io/pypi/v/marshmallow-objects?label=version)](https://pypi.org/project/marshmallow-objects/)
+[![Black](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
 
 ## Marshmallow Objects and Models
 
