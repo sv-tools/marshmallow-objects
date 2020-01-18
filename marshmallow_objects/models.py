@@ -206,7 +206,7 @@ class Model(with_metaclass(ModelMeta)):
 
     @classmethod
     def load_json(
-        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs,
+        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs
     ):
         schema = cls.__get_schema_class__(context=context)
         loaded = schema.loads(data, many=many, partial=partial, unknown=unknown, *args, **kwargs)
@@ -217,7 +217,7 @@ class Model(with_metaclass(ModelMeta)):
 
     @classmethod
     def load_yaml(
-        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs,
+        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs
     ):
         loaded = yaml.load(data, Loader=yaml.FullLoader)
         return cls.load(loaded, context=context, many=many, partial=partial, unknown=unknown,)

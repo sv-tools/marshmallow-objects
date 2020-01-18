@@ -1,5 +1,7 @@
 pyyaml
 coverage
 codecov
-black
+black; python_version >= '3.6'
 flake8
+
+-r requirements.txt
