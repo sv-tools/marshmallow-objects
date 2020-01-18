@@ -1,6 +1,5 @@
 # marshmallow-objects
 
-[![Build Status](https://travis-ci.com/SVilgelm/marshmallow-objects.svg?branch=master)](https://travis-ci.com/SVilgelm/marshmallow-objects)
 [![codecov](https://codecov.io/gh/SVilgelm/marshmallow-objects/branch/master/graph/badge.svg)](https://codecov.io/gh/SVilgelm/marshmallow-objects)
 [![PyPI version](https://badge.fury.io/py/marshmallow-objects.svg)](https://badge.fury.io/py/marshmallow-objects)
 
