@@ -1,5 +1,6 @@
 # marshmallow-objects
 
+[![Test](https://github.com/SVilgelm/marshmallow-objects/workflows/Test%20Master%20Branch/badge.svg)](https://github.com/SVilgelm/marshmallow-objects/actions?query=workflow%3A%22Test+Master+Branch%22)
 [![codecov](https://codecov.io/gh/SVilgelm/marshmallow-objects/branch/master/graph/badge.svg)](https://codecov.io/gh/SVilgelm/marshmallow-objects)
 [![PyPI version](https://badge.fury.io/py/marshmallow-objects.svg)](https://badge.fury.io/py/marshmallow-objects)
 
