@@ -3,6 +3,9 @@ name: Test Master Branch
 on:
   schedule:
     - cron: "0 1 * * *"
+  push:
+    branches:
+      - master
 
 jobs:
   test:
