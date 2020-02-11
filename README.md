@@ -1,7 +1,7 @@
 # marshmallow-objects
 
-[![Test](https://img.shields.io/github/workflow/status/SVilgelm/marshmallow-objects/Test%20Master%20Branch)](https://github.com/SVilgelm/marshmallow-objects/actions?query=workflow%3A%22Test+Master+Branch%22)
-[![Codecov](https://img.shields.io/codecov/c/github/SVilgelm/marshmallow-objects)](https://codecov.io/gh/SVilgelm/marshmallow-objects)
+[![Test](https://img.shields.io/github/workflow/status/sv-tools/marshmallow-objects/Test%20Master%20Branch)](https://github.com/sv-tools/marshmallow-objects/actions?query=workflow%3A%22Test+Master+Branch%22)
+[![Codecov](https://img.shields.io/codecov/c/github/sv-tools/marshmallow-objects)](https://codecov.io/gh/sv-tools/marshmallow-objects)
 [![Version](https://img.shields.io/pypi/v/marshmallow-objects?label=version)](https://pypi.org/project/marshmallow-objects/)
 [![Black](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
 
@@ -47,7 +47,7 @@ $ pip install -U marshmallow-objects
 
 * [Marshmallow](https://github.com/marshmallow-code/marshmallow)
 * [PyPi](https://pypi.python.org/pypi/marshmallow-objects)
-* [Cookbook](https://github.com/SVilgelm/marshmallow-objects/wiki)
+* [Cookbook](https://github.com/sv-tools/marshmallow-objects/wiki)
 
 ## License
 
