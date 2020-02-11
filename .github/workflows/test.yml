@@ -21,7 +21,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r test-requirements.txt
       - name: Audit Python packages for known vulnerabilities
-        run: ossaudit --installed --config setup.cfg --username ${{ secrets.OSS_USERNAME }} --token ${{ secrets.OSS_TOKEN }}
+        run: |
+          if ! RES=$(ossaudit --installed --config setup.cfg); then
+            RES="${RES//'%'/'%25'}"
+            RES="${RES//$'\n'/'%0A'}"
+            RES="${RES//$'\r'/'%0D'}"
+            echo "::error ::${RES}"
+            exit 1
+          fi
+          echo ${RES}
       - name: Lint with flake8
         run: flake8 --show-source
       - name: Format with black
