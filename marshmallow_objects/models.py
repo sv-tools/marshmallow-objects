@@ -205,9 +205,7 @@ class Model(with_metaclass(ModelMeta)):
             return dump
 
     @classmethod
-    def load_json(
-        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs
-    ):
+    def load_json(cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs):
         schema = cls.__get_schema_class__(context=context)
         loaded = schema.loads(data, many=many, partial=partial, unknown=unknown, *args, **kwargs)
         return loaded
@@ -216,9 +214,7 @@ class Model(with_metaclass(ModelMeta)):
         return json.dumps(self.dump())
 
     @classmethod
-    def load_yaml(
-        cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs
-    ):
+    def load_yaml(cls, data, context=None, many=None, partial=None, unknown=None, *args, **kwargs):
         loaded = yaml.load(data, Loader=yaml.FullLoader)
         return cls.load(loaded, context=context, many=many, partial=partial, unknown=unknown,)
 
@@ -250,8 +246,7 @@ class Model(with_metaclass(ModelMeta)):
 
     @classmethod
     def validate(cls, data, context=None, many=None, partial=None):
-        kwargs = {"context": context}
-        schema = cls.__get_schema_class__(**kwargs)
+        schema = cls.__get_schema_class__(context=context, partial=partial)
         return schema.validate(data, many=many, partial=partial)
 
     def __copy__(self):
@@ -289,7 +284,7 @@ def dump_many(data, context=None):
                 schema = obj.__get_schema_class__(context=context)
             obj_data = schema.dump(obj)
             ret.append(obj_data)
-        elif isinstance(obj, collections.Sequence) and not isinstance(obj, str):
+        elif isinstance(obj, collections.abc.Sequence) and not isinstance(obj, str):
             ret.append(dump_many(obj, context=context))
         else:
             raise marshmallow.ValidationError(
