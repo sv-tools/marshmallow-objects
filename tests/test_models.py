@@ -506,3 +506,25 @@ class TestOptionalModel(unittest.TestCase):
         obj.int_field = 1
         ddata = obj.dump()
         self.assertEqual({"int_field": 1}, ddata)
+
+
+class TestValidatePartial(unittest.TestCase):
+    def setUp(self):
+        class TestModel(marshmallow.Model):
+            expected_partial = marshmallow.fields.Boolean(allow_none=True)
+
+            @marshmallow.validates_schema
+            def schema_validator(schema, data, **kwargs):
+                self.assertEqual(data.get("expected_partial"), schema.partial)
+
+        self.test_model_class = TestModel
+
+    def test_partial_true(self):
+        self.test_model_class.validate(dict(expected_partial=True), partial=True)
+
+    def test_partial_false(self):
+        self.test_model_class.validate(dict(expected_partial=False), partial=False)
+
+    def test_partial_omitted(self):
+        self.test_model_class.validate(dict(expected_partial=None))
+        self.test_model_class.validate(dict())
