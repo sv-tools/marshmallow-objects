@@ -3,7 +3,7 @@ name: Upload Python Package
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - "*"
 
 env:
   GPG_KEY: "7D76B375F08A7D93584B36D766538F03CDA385C7"
@@ -12,7 +12,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
@@ -26,6 +26,7 @@ jobs:
           gpgconf --kill gpg-agent
           gpg --quiet --batch --yes --decrypt --passphrase="${{ secrets.GPG_PASSPHRASE }}" --output .github/sv-go-tools-bot.asc .github/sv-go-tools-bot.asc.gpg
           gpg --batch --yes --import .github/sv-go-tools-bot.asc
+          rm .github/sv-go-tools-bot.asc
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
