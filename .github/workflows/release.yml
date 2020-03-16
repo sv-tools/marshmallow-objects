@@ -4,9 +4,9 @@ on:
   push:
     tags:
       - "*"
-
 env:
   GPG_KEY: "7D76B375F08A7D93584B36D766538F03CDA385C7"
+  PYTHON: 3.8
 
 jobs:
   release:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: "3.7"
+          python-version: ${{ env.PYTHON }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

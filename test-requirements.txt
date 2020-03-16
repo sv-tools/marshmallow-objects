@@ -1,7 +1,6 @@
 ossaudit
 pyyaml>=4.1
 coverage
-codecov
 black; python_version >= '3.6'
 flake8
 
