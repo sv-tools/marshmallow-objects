@@ -159,7 +159,12 @@ class Model(with_metaclass(ModelMeta)):
             if isinstance(field, fields.Nested):
                 nested = getattr(self, name, None)
                 if nested is not None and nested != marshmallow.missing:
-                    nested.__propagate_dump_mode__(value)
+                    if isinstance(nested, list):
+                        for sub_nested in nested:
+                            if sub_nested is not None and sub_nested != marshmallow.missing:
+                                sub_nested.__propagate_dump_mode__(value)
+                    else:
+                        nested.__propagate_dump_mode__(value)
 
     @contextlib.contextmanager
     def __dump_mode_on__(self):
