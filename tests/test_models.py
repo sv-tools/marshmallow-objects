@@ -538,6 +538,7 @@ class MissingPerson(marshmallow.Model):
 class MissingCompany(marshmallow.Model):
     name = marshmallow.fields.String()
     owner = marshmallow.NestedModel(MissingPerson)
+    hr = marshmallow.NestedModel(MissingPerson, allow_none=True)
 
 
 class TestMissingFields(unittest.TestCase):
