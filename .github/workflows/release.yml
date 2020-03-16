@@ -54,7 +54,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ steps.version.outputs.version }}
       - name: Upload wheel
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -63,7 +63,7 @@ jobs:
           asset_name: marshmallow_objects-${{ steps.version.outputs.version }}-py3-none-any.whl
           asset_content_type: application/octet-stream
       - name: Upload signature
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
