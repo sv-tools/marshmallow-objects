@@ -132,11 +132,16 @@ class Model(with_metaclass(ModelMeta)):
         super(Model, self).__setattr__(key, value)
 
     def __getattribute__(self, item):
-        get = super(Model, self).__getattribute__
-        if get("__dump_mode__"):
-            if item in get("__missing_fields__"):
+        if object.__getattribute__(self, "__dump_mode__"):
+            if item in object.__getattribute__(self, "__missing_fields__"):
                 return marshmallow.missing
-        return get(item)
+        return object.__getattribute__(self, item)
+
+    def __propagate_dump_mode__(self, value):
+        self.__dump_mode__ = value
+        for name, field in self.__schema__.fields.items():
+            if isinstance(field, fields.Nested):
+                getattr(self, name).__propagate_dump_mode__(value)
 
     @contextlib.contextmanager
     def __dump_mode_on__(self):
@@ -145,10 +150,10 @@ class Model(with_metaclass(ModelMeta)):
                 yield
             else:
                 try:
-                    self.__dump_mode__ = True
+                    self.__propagate_dump_mode__(True)
                     yield
                 finally:
-                    self.__dump_mode__ = False
+                    self.__propagate_dump_mode__(False)
 
     def __init__(self, context=None, partial=None, **kwargs):
         pass

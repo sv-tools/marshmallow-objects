@@ -528,3 +528,21 @@ class TestValidatePartial(unittest.TestCase):
     def test_partial_omitted(self):
         self.test_model_class.validate(dict(expected_partial=None))
         self.test_model_class.validate(dict())
+
+
+class MissingPerson(marshmallow.Model):
+    name = marshmallow.fields.String()
+    age = marshmallow.fields.Integer()
+
+
+class MissingCompany(marshmallow.Model):
+    name = marshmallow.fields.String()
+    owner = marshmallow.NestedModel(MissingPerson)
+
+
+class TestMissingFields(unittest.TestCase):
+    def test_missing_filed(self):
+        self.assertEqual({"name": "John Doe"}, MissingPerson(name="John Doe").dump())
+
+    def test_nested_missing_filed(self):
+        self.assertEqual({"owner": {"name": "John Doe"}}, MissingCompany(owner={"name": "John Doe"}).dump())
