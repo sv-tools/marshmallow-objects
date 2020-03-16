@@ -2,20 +2,18 @@ name: Test Pull Request
 
 on:
   - pull_request
+env:
+  PYTHON: 3.8
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7]
-
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -35,19 +33,18 @@ jobs:
       - name: Format with black
         run: black --check $(git diff --name-only --diff-filter=AM ${{ github.base_ref }} -- "*.py")
       - name: Run unit tests with coverage
-        run: coverage run --source=marshmallow_objects setup.py test
-      - name: Trigger codecov
-        run: codecov
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          coverage run --source=marshmallow_objects setup.py test
+          coverage xml -i
+      - name: Codecov
+        uses: codecov/codecov-action@v1
 
   test-extra:
     needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.8]
-
+        python-version: [3.5, 3.6, 3.7]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
