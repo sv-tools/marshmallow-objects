@@ -546,3 +546,25 @@ class TestMissingFields(unittest.TestCase):
 
     def test_nested_missing_filed(self):
         self.assertEqual({"owner": {"name": "John Doe"}}, MissingCompany(owner={"name": "John Doe"}).dump())
+
+
+class SelfNested(marshmallow.Model):
+    name = marshmallow.fields.String()
+    friend = marshmallow.NestedModel("SelfNested")
+
+
+class WrongNested(marshmallow.Model):
+    name = marshmallow.fields.String()
+    friend = marshmallow.NestedModel("UknownNested")
+
+
+class TestSelfNested(unittest.TestCase):
+    def test_self_nested(self):
+        obj = SelfNested.load({"name": "John Doe", "friend": {"name": "Jane Doe"}})
+        self.assertEqual("John Doe", obj.name)
+        self.assertEqual("Jane Doe", obj.friend.name)
+
+    def test_wrong_nested(self):
+        with self.assertRaises(marshmallow.ValidationError) as exp:
+            WrongNested.load({"name": "John Doe", "friend": {"name": "Jane Doe"}})
+            self.assertEqual("{'friend': [\"The class 'UknownNested' not found\"]}", str(exp))

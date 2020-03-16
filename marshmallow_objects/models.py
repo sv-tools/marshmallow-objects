@@ -5,6 +5,7 @@ import pprint
 import threading
 import configparser
 import io
+import sys
 
 import marshmallow
 from marshmallow import fields
@@ -81,9 +82,24 @@ class ModelMeta(type):
         return obj
 
 
+def _find_nested(nested):
+    def func():
+        for name, module in sys.modules.items():
+            klass = getattr(module, nested, None)
+            if klass is not None and issubclass(klass, Model):
+                return klass.__schema_class__
+        raise marshmallow.ValidationError("The class '%s' not found" % nested)
+
+    return func
+
+
 class NestedModel(fields.Nested):
     def __init__(self, nested, **kwargs):
-        super(NestedModel, self).__init__(nested.__schema_class__, **kwargs)
+        if isinstance(nested, str):
+            schema_class = _find_nested(nested)
+        else:
+            schema_class = nested.__schema_class__
+        super(NestedModel, self).__init__(schema_class, **kwargs)
 
     def _deserialize(self, value, attr, data, **kwargs):
         if self.many and value and isinstance(value[0], Model):
