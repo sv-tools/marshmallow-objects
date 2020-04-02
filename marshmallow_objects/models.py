@@ -156,6 +156,8 @@ class Model(with_metaclass(ModelMeta)):
     def __propagate_dump_mode__(self, value):
         self.__dump_mode__ = value
         for name, field in self.__schema__.fields.items():
+            if isinstance(field, fields.List):
+                field = field.inner
             if isinstance(field, fields.Nested):
                 nested = getattr(self, name, None)
                 if nested is not None and nested != marshmallow.missing:
