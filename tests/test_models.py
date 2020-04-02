@@ -540,6 +540,7 @@ class MissingCompany(marshmallow.Model):
     owner = marshmallow.NestedModel(MissingPerson)
     hr = marshmallow.NestedModel(MissingPerson, allow_none=True)
     workers = marshmallow.NestedModel(MissingPerson, many=True, allow_none=True)
+    assets = marshmallow.fields.List(marshmallow.NestedModel(MissingPerson))
 
 
 class TestMissingFields(unittest.TestCase):
@@ -558,6 +559,11 @@ class TestMissingFields(unittest.TestCase):
         obj = MissingCompany(owner={"name": "John Doe"}, workers=[{"name": "Bob"}])
         self.assertEqual(1, len(obj.workers))
         self.assertEqual({"owner": {"name": "John Doe"}, "workers": [{"name": "Bob"}]}, obj.dump())
+
+    def test_list_field_nested(self):
+        obj = MissingCompany.load({"owner": {"name": "John Doe"}, "assets": [{"name": "MissingAsset"}]})
+        self.assertEqual(1, len(obj.assets))
+        self.assertEqual({"owner": {"name": "John Doe"}, "assets": [{"name": "MissingAsset"}]}, obj.dump())
 
 
 class SelfNested(marshmallow.Model):
