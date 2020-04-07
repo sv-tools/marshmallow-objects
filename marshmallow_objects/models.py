@@ -50,7 +50,7 @@ class ModelMeta(type):
         parent_schemas = []
         if parents:
             for parent in parents:
-                if issubclass(parent, Model):
+                if issubclass(parent, Model) and parent != Model:
                     parent_schemas.append(parent.__schema_class__)
         parent_schemas = parent_schemas or [cls.__schema_class__ or marshmallow.Schema]
         schema_class = type(name + "Schema", tuple(parent_schemas), schema_fields)
