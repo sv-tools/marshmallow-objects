@@ -55,6 +55,15 @@ class MultiInheritance(A, B, C):
     pass
 
 
+class CustomSchema(marshmallow.Schema):
+    def custom_method(self):
+        pass
+
+
+class D(marshmallow.Model):
+    __schema_class__ = CustomSchema
+
+
 def serialize_context_field(obj, context=None):
     return obj.test_field == context["value"]
 
@@ -112,6 +121,9 @@ class TestModelMeta(unittest.TestCase):
         self.assertEqual(
             id(MultiInheritance.handle_error), id(MultiInheritance.__schema_class__.handle_error),
         )
+
+    def test_schema_class_override(self):
+        self.assertTrue(issubclass(D.__schema_class__, CustomSchema), D.__schema_class__.__bases__)
 
 
 class TestModel(unittest.TestCase):
