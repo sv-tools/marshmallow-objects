@@ -37,7 +37,7 @@ jobs:
           coverage run --source=marshmallow_objects setup.py test
           coverage xml -i
       - name: Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v1.0.10
 
   test-extra:
     needs: test
