@@ -28,5 +28,3 @@ jobs:
         run: coverage run --source=marshmallow_objects setup.py test
       - name: Codecov
         uses: codecov/codecov-action@v1
-        with:
-          yml: ./.codecov.yml
