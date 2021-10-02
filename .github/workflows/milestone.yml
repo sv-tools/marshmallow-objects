@@ -6,12 +6,15 @@ on:
 
 jobs:
   bump-version:
+    if: github.event_name == 'milestone'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_TOKEN }}
+
       - name: Configure Git
         run: |
           git config user.name "sv-tools-bot"
@@ -19,7 +22,12 @@ jobs:
           git fetch --all
       - name: Create Tag
         run: |
-          docker pull svtools/bumptag:latest
           docker run --rm -v $PWD:/mount -w /mount svtools/bumptag:latest ${{ github.event.milestone.title }}
       - name: Push Tag
         run: git push origin --tags
+
+      - name: Create Milestone
+        uses: sv-tools/create-milestone-action@v1.0.0
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          title: Next
