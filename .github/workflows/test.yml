@@ -3,7 +3,7 @@ name: Test Pull Request
 on:
   - pull_request
 env:
-  PYTHON: 3.8
+  PYTHON: 3.9
 
 jobs:
   test:
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7]
+        python-version: [3.5, 3.6, 3.7, 3.8]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
