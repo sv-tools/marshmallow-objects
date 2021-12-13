@@ -27,7 +27,7 @@ jobs:
         run: git push origin --tags
 
       - name: Create Milestone
-        uses: sv-tools/create-milestone-action@v1.1.0
+        uses: sv-tools/create-milestone-action@v1.4.0
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           title: Next
